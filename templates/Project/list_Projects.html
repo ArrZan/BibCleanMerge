@@ -1,0 +1,384 @@
+{% extends 'Project/base_project.html' %}
+{% load static %}
+
+
+{% block cssCustoms2 %}
+    <link rel="stylesheet" href="{% static "css/list_projects.css" %}">
+{% endblock %}
+
+
+<!-- contenido de la pagina -->
+{% block content %}
+    <div class="header-c">
+        <div class="row">
+            <div class="col-md he-title">
+                <h1>MIS PROYECTOS</h1>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md">
+                <p class="info_title">Listado de proyectos creados.</p>
+            </div>
+            <div class="col d-flex justify-content-end align-items-center btn-float">
+                <button id="callFileUploader" class="btn btn_primary me-2 col-auto fw-bold" data-bs-toggle="modal"
+                    data-bs-target="#añadir_manual">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    <div class="text-bt">
+                        Procesa ya
+                    </div>
+                </button>
+                <button class="btn btn_warning col-auto fw-bold" data-bs-toggle="modal" data-bs-target="#add_project">
+                    <img src="{% static 'img/utils/plus.svg' %}" alt="+">
+                    <div class="text-bt">
+                        Nuevo Proyecto
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Contenido de la pagina -->
+    <div class="body-c">
+        <div class="content-project">
+
+            <div class="ct-body">
+                <div class="row header">
+                    <div class="col-r col1">Nombre del proyecto</div>
+                    <div class="col-r col2 d-flex justify-content-center">N. Artículos</div>
+                    <div class="col-r col3 d-flex justify-content-center">Fecha</div>
+                    <div class="col-r col4 d-flex justify-content-end">Opciones</div>
+                </div>
+
+                <div class="row body scroll-st scroll-style">
+                    <!-- <h5 style="margin-top:5px;">Aún no tienes proyectos.</h5> -->
+                    <div class="items">
+                        <div class="item" data-project-id="1">
+
+                            <a class="col1" href="gestion_proyectos.html">
+                                <span class="title-pj">Proyecto ABC</span>
+                            </a>
+
+                            <div class="col2">
+                                <div class="row1">
+
+
+                                    <div class="text">
+                                        <div class="num-pj">3500</div>
+                                    </div>
+
+                                    <div class="text">
+                                        <div class="date-pj">28/02/2024</div>
+                                    </div>
+
+                                    <div class="menu-options">
+                                        <button class="btn btn-options" onclick="showOptions(this)">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+
+                                        <div class="options">
+                                            <button class="btn btn-bar">
+                                                <i class="bi bi-bar-chart-line-fill"></i>
+                                                <span class="text">Ver último reporte</span>
+                                            </button>
+                                            <button class="btn btn-download">
+                                                <i class="bi bi-file-earmark-arrow-down-fill"></i>
+                                                <span class="text">Descargar merged</span>
+                                            </button>
+                                            <button class="btn btn-trash" data-bs-toggle="modal" data-bs-target="#delete-project" data-project-id="1" onclick="showDeleteModal(this)">
+                                                <i class="bi bi-trash-fill"></i>
+                                                <span class="text">Eliminar</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+
+
+                                <div class="row2 scroll-st scroll-style">
+                                    <div class="text">
+                                        <div class="desc-pj">Lorem ipsum, dolor sit amet consectetur adipisicing
+                                            elit. Dicta adipisci nemo explicabo porro dolorem quas iure quo
+                                            aliquam a at odio nostrum totam numquam cumque fuga, natus ea
+                                            necessitatibus libero.</div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <button class="eye-float" onclick="showDescription(this)">
+                                <i class="bi bi-eye-fill"></i>
+                                <i class="bi bi-eye-slash-fill"></i>
+                            </button>
+
+                        </div>
+
+                        <div class="item" data-project-id="2">
+
+                            <a class="col1" href="gestion_proyectos.html">
+                                <span class="title-pj">Proyecto DEF</span>
+                            </a>
+
+                            <div class="col2">
+                                <div class="row1">
+
+
+                                    <div class="text">
+                                        <div class="num-pj">3500</div>
+                                    </div>
+
+                                    <div class="text">
+                                        <div class="date-pj">28/02/2024</div>
+                                    </div>
+
+                                    <div class="menu-options">
+                                        <button class="btn btn-options" onclick="showOptions(this)">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+
+                                        <div class="options">
+                                            <button class="btn btn-bar">
+                                                <i class="bi bi-bar-chart-line-fill"></i>
+                                                <span class="text">Ver último reporte</span>
+                                            </button>
+                                            <button class="btn btn-download">
+                                                <i class="bi bi-file-earmark-arrow-down-fill"></i>
+                                                <span class="text">Descargar merged</span>
+                                            </button>
+                                            <button class="btn btn-trash" data-bs-toggle="modal" data-bs-target="#delete-project" data-project-id="2" onclick="showDeleteModal(this)">
+                                                <i class="bi bi-trash-fill"></i>
+                                                <span class="text">Eliminar</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+
+
+                                <div class="row2 scroll-st scroll-style">
+                                    <div class="text">
+                                        <div class="desc-pj">Lorem ipsum, dolor sit amet consectetur adipisicing
+                                            elit. Dicta adipisci nemo explicabo porro dolorem quas iure quo
+                                            aliquam a at odio nostrum totam numquam cumque fuga, natus ea
+                                            necessitatibus libero.</div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <button class="eye-float" onclick="showDescription(this)">
+                                <i class="bi bi-eye-fill"></i>
+                                <i class="bi bi-eye-slash-fill"></i>
+                            </button>
+
+                        </div>
+
+                        <div class="item" data-project-id="3">
+
+                            <a class="col1" href="gestion_proyectos.html">
+                                <span class="title-pj">Proyecto GHI</span>
+                            </a>
+
+                            <div class="col2">
+                                <div class="row1">
+
+
+                                    <div class="text">
+                                        <div class="num-pj">3500</div>
+                                    </div>
+
+                                    <div class="text">
+                                        <div class="date-pj">28/02/2024</div>
+                                    </div>
+
+                                    <div class="menu-options">
+                                        <button class="btn btn-options" onclick="showOptions(this)">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+
+                                        <div class="options">
+                                            <button class="btn btn-bar">
+                                                <i class="bi bi-bar-chart-line-fill"></i>
+                                                <span class="text">Ver último reporte</span>
+                                            </button>
+                                            <button class="btn btn-download">
+                                                <i class="bi bi-file-earmark-arrow-down-fill"></i>
+                                                <span class="text">Descargar merged</span>
+                                            </button>
+                                            <button class="btn btn-trash" data-bs-toggle="modal" data-bs-target="#delete-project" data-project-id="3" onclick="showDeleteModal(this)">
+                                                <i class="bi bi-trash-fill"></i>
+                                                <span class="text">Eliminar</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+
+
+                                <div class="row2 scroll-st scroll-style">
+                                    <div class="text">
+                                        <div class="desc-pj">Lorem ipsum, dolor sit amet consectetur adipisicing
+                                            elit. Dicta adipisci nemo explicabo porro dolorem quas iure quo
+                                            aliquam a at odio nostrum totam numquam cumque fuga, natus ea
+                                            necessitatibus libero.</div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <button class="eye-float" onclick="showDescription(this)">
+                                <i class="bi bi-eye-fill"></i>
+                                <i class="bi bi-eye-slash-fill"></i>
+                            </button>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+
+<!-- Modal's -->
+
+{% block modals %}
+    <!-- Modal SUBIR ARCHIVOS RÁPIDO ------------------------------------------------------------>
+    <div class="modal fade" id="añadir_manual" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <div class="d-flex flex-column align-items-start">
+                        <h1 class="modal-title fs-3" id="staticBackdropLabel">Archivos subidos</h1>
+                        <small class="text-center">formato permitido: .bib</small>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body" id="drop-zone">
+
+                    <div class="blur"><p>Arrastre archivos aquí</p></div>
+
+                    <div class="container text-center">
+                        <form class="custom-form" method="post" id="form-files" action="." enctype="multipart/form-data">
+                            <div id="file-list" class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6">
+                                    {% csrf_token %}
+                                    
+                                    <div class="col add-file">
+                                        <div id="add-file-button" class="square">
+    
+                                            <div class="img-file">
+                                                <svg fill="#000000" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="256px" height="256px" viewBox="0 0 45.40 45.40" xml:space="preserve" stroke="#000000" stroke-width="0.00045402" transform="rotate(0)"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="1.36206"></g><g id="SVGRepo_iconCarrier"> <g> <path d="M41.267,18.557H26.832V4.134C26.832,1.851,24.99,0,22.707,0c-2.283,0-4.124,1.851-4.124,4.135v14.432H4.141 c-2.283,0-4.139,1.851-4.138,4.135c-0.001,1.141,0.46,2.187,1.207,2.934c0.748,0.749,1.78,1.222,2.92,1.222h14.453V41.27 c0,1.142,0.453,2.176,1.201,2.922c0.748,0.748,1.777,1.211,2.919,1.211c2.282,0,4.129-1.851,4.129-4.133V26.857h14.435 c2.283,0,4.134-1.867,4.133-4.15C45.399,20.425,43.548,18.557,41.267,18.557z"></path> </g> </g></svg>
+                                            </div>
+    
+                                        </div>
+                                        <div class="text">Subir archivo o arrastrar aquí</div>
+                                        <input type="file" id="file-input" hidden name="files[]" accept=".bib" multiple>
+                                    </div>
+    
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer d-flex justify-content-center">
+
+                    <button type="button" class="btn btn-secondary col-lg-2" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn_warning col-lg-3" id="btn-send-files">Procesar</button>
+
+                </div>
+
+            </div>
+        </div>
+        <div id="liveAlertPlaceholder"></div>
+
+    </div>
+
+
+
+
+
+
+    <!-- Modal CREAR Proyecto  -------------------------------------------------------------------------->
+    <div class="modal fade" id="add_project" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <i class="bi bi-folder-plus"></i>
+                <h1 class="modal-title fs-3" id="staticBackdropLabel">Nuevo Proyecto</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            </div>
+
+            <div class="modal-body d-flex justify-content-center">
+
+                <div class="col col-11">
+                    <div class="form-floating mt-3 mb-3">
+                        <input type="text" class="form-control" id="titleProject" minlength="10" maxlength="50" placeholder="Nombre del proyecto">
+                        <label for="floatingInput">Nombre del proyecto</label>
+                    </div>
+
+                    <div class="form-floating mt-3 mb-3">
+                        <textarea class="form-control" placeholder="Dale una descripción a tu proyect" id="textProject" style="height: 100px"></textarea>
+                        <label for="floatingTextarea">Descripción de proyecto</label>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="modal-footer">
+                <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> -->
+                <button type="button" class="btn btn-primary col-3" onclick="createProject()">Crear</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <!-- Modal PARA ELIMINAR UN PROYECTO --------------------------------------------------------->
+    <div class="modal fade" id="delete-project" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <i class="bi bi-folder-x"></i>
+                <h1 class="modal-title fs-4" id="exampleModalLabel">Eliminar proyecto</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            </div>
+
+            <div class="modal-body">
+                <p>¿Estás seguro de eliminar el proyecto <span id="project-name"></span>?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="delete-project-id" data-project-id="" onclick="deleteProject(this)">Eliminar</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+{% endblock modals %}
+
+{% block js %}
+    <script src="{% static "js/menu.js" %}"></script>
+    <script src="{% static "js/list_projects.js" %}"></script>
+{% endblock js %}

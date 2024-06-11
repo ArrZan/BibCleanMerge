@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block cssCustoms %}
+    <link rel="stylesheet" href="{% static "css/menu.css" %}">
+    <link rel="stylesheet" href="{% static "css/content.css" %}">
+{% endblock %}
+
+
+<!-- contenido del main de la pagina -->
+{% block main %}
+    
+    <div class="main-container">
+        <!-- Menu-->
+        {% block sidebar %}
+            {% include "sidebar.html" %}
+        {% endblock %}
+    
+    
+        <!-- Contenido del content de la página -->
+        <section class="content">
+        
+            <!-- NAVBAR PARA CELL------------------------------------------------------------- -->
+            <div class="navbar">
+
+                <div class="user_img">
+{#                    Colocar el get_image del user #}
+                    <img class="image_perfil" src="{% static 'img/perfil/default.jpg' %}" alt="Logo de usuario">
+                </div>
+
+                <div class="navbar-btn">
+                    <i class="bi bi-list"></i>
+                </div>
+
+            </div>
+        
+            <!-- información de la pagína ------------------------------------------------------ -->
+            {% block content %}
+                
+            {% endblock %}
+        </section>
+
+    </div>
+    
+{% endblock %}

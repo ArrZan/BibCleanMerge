@@ -1,0 +1,19 @@
+:root{
+    --body: #E5E8ED;
+    --blue: #256397;
+    --blue-middle: #194466;
+    --blue-dark: #082C50;
+    --blue-dark-re: #0A273E;
+    --orange: #FF8118;
+    --yellow: #FFB414;
+    --gray: #EEEFF3;
+    --gray-middle: #D8D8D8;
+    --gray-dark: #3F3F3F;
+    --red-light: #f89f9f;
+    --red: #FF2121;
+    --red-dark: #b31111;
+    --green: #00B050;
+    --green-dark: #135832;
+    --br-radius-cus: 0.575rem;
+    --br-radius-inp: 0.275rem;
+}

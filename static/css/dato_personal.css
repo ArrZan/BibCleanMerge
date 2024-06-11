@@ -1,0 +1,47 @@
+.image_edit {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    border: 7px solid white;
+    box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;
+}
+
+.text_info {
+    color: #7F7F7F;
+}
+
+.card_form {
+    height: 70%;
+}
+
+@media (max-width: 1267px) {
+    .image_container {
+        width: 100%;
+    }
+
+    .image_edit {
+        width: 150px;
+        height: 150px;
+    }
+
+    .container_content {
+        overflow-y: auto;
+    }
+
+
+}
+
+@media (max-width: 615px) {
+    .col {
+        width: 100%;
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+}
+
+.bg_warning {
+    background: rgb(255, 180, 20);
+    background: linear-gradient(100deg, rgba(255, 180, 20, 1) 40%, rgba(255, 129, 24, 1) 91%);
+
+}

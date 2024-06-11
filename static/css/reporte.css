@@ -1,0 +1,80 @@
+.card {
+    height: 100%;
+}
+
+.pastel_reporte {
+    background-color: white;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    border-radius: 10px;
+}
+
+#grafica {
+    max-width: 500px;
+}
+
+.detalle_reporte {
+    min-height: 95px;
+    height: hidden;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.valores {
+    margin-top: -20px;
+}
+
+.bg_primary {
+    background-color: #082c50;
+    color: white;
+}
+
+.text_primary {
+    color: #082c50;
+}
+
+.text_warning {
+    color: #ffb414;
+}
+
+.btn_warning {
+    background: rgb(255, 180, 20);
+    background: linear-gradient(100deg, rgba(255, 180, 20, 1) 40%, rgba(255, 129, 24, 1) 91%);
+    box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+    border-radius: 6px;
+}
+
+.bg_warning {
+    background: rgb(255, 180, 20);
+    background: linear-gradient(100deg, rgba(255, 180, 20, 1) 40%, rgba(255, 129, 24, 1) 91%);
+
+}
+
+
+@media (max-width: 1354px) {
+    .container_pastel {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .card {
+        overflow-x: auto;
+    }
+}
+
+
+@media (max-width: 1267px) {
+    .card {
+        overflow-x: auto;
+    }
+}
+
+.btn_primary {
+    color: white;
+    background: rgb(8, 44, 80);
+    background: linear-gradient(100deg, rgba(8, 44, 80, 1) 24%, rgba(25, 68, 102, 1) 100%);
+    box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+}
+
+.btn_primary:hover {
+    color: white;
+}
