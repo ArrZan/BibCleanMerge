@@ -137,6 +137,12 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
+# RUTA PARA LOS ARCHIVOS PROCESADOS RAPIDAMENTE
+MEDIA_BIB = os.path.join(MEDIA_ROOT, 'files', 'bib')
+
+# Si no existe el path de bib, lo crea
+os.makedirs(MEDIA_BIB, exist_ok=True)
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

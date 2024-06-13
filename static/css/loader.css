@@ -1,0 +1,65 @@
+.blur-shadow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    backdrop-filter: blur(3px);
+    background-color: rgba(82, 78, 78, 0.1);
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 10;
+    cursor: url('https://ionicframework.com/img/finger.png'), auto;
+    transition: all .3s;
+}
+
+.blur-shadow.shadow-loader {
+    opacity: 1;
+    visibility: visible;
+}
+
+.shadow-loader .loader {
+    width: 200px;
+    height: 200px;
+    background-color: #0A273E;
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 0 30px 4px rgba(0, 0, 0, 0.5) inset,
+      0 5px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    transition: all .2s .3s;
+}
+
+  .shadow-loader .loader:before,
+  .shadow-loader .loader:after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 45%;
+    top: -40%;
+    background-color: #fff;
+  }
+
+  .shadow-loader.animation-wave .loader:before,
+  .shadow-loader.animation-wave .loader:after {
+    animation: wave 5s linear infinite;
+  }
+
+
+  .shadow-loader .loader:before {
+    border-radius: 30%;
+    background: var(--orange);
+    animation: wave 5s linear infinite;
+  }
+  @keyframes wave {
+    0% {
+      transform: rotate(0);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }

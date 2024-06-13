@@ -4,6 +4,7 @@
 
 {% block cssCustoms2 %}
     <link rel="stylesheet" href="{% static "css/list_projects.css" %}">
+    <link rel="stylesheet" href="{% static "css/loader.css" %}">
 {% endblock %}
 
 
@@ -27,7 +28,7 @@
                         Procesa ya
                     </div>
                 </button>
-                <button class="btn btn_warning col-auto fw-bold" data-bs-toggle="modal" data-bs-target="#add_project">
+                <button disabled class="btn btn_warning col-auto fw-bold" data-bs-toggle="modal" data-bs-target="#add_project">
                     <img src="{% static 'img/utils/plus.svg' %}" alt="+">
                     <div class="text-bt">
                         Nuevo Proyecto
@@ -53,7 +54,7 @@
                     <div class="items">
                         <div class="item" data-project-id="1">
 
-                            <a class="col1" href="gestion_proyectos.html">
+                            <a class="col1" href="#">
                                 <span class="title-pj">Proyecto ABC</span>
                             </a>
 
@@ -115,7 +116,7 @@
 
                         <div class="item" data-project-id="2">
 
-                            <a class="col1" href="gestion_proyectos.html">
+                            <a class="col1" href="#">
                                 <span class="title-pj">Proyecto DEF</span>
                             </a>
 
@@ -177,7 +178,7 @@
 
                         <div class="item" data-project-id="3">
 
-                            <a class="col1" href="gestion_proyectos.html">
+                            <a class="col1" href="#">
                                 <span class="title-pj">Proyecto GHI</span>
                             </a>
 
@@ -250,6 +251,8 @@
 
 {% block modals %}
     <!-- Modal SUBIR ARCHIVOS RÁPIDO ------------------------------------------------------------>
+
+
     <div class="modal fade" id="añadir_manual" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
@@ -293,7 +296,7 @@
                 <div class="modal-footer d-flex justify-content-center">
 
                     <button type="button" class="btn btn-secondary col-lg-2" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn_warning col-lg-3" id="btn-send-files">Procesar</button>
+                    <button type="button" class="btn btn_primary col-lg-3" id="btn-send-files">Procesar</button>
 
                 </div>
 
@@ -302,6 +305,7 @@
         <div id="liveAlertPlaceholder"></div>
 
     </div>
+
 
 
 
@@ -374,6 +378,10 @@
             </div>
         </div>
         </div>
+    </div>
+
+    <div class="blur-shadow">
+        <span class="loader"></span>
     </div>
 
 {% endblock modals %}

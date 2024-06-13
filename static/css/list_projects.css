@@ -552,7 +552,6 @@
 
 #delete-project .modal-footer .btn-primary:hover {
     background: var(--red);
-
 }
 
 
@@ -674,7 +673,7 @@
     }
 
     .ct-body .item .menu-options.toggle .options {
-        height: 173px;
+        height: auto;
         top: 42px;
         visibility: visible;
         opacity: 1;

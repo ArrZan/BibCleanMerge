@@ -25,20 +25,31 @@
 
 .btn_warning {
     background: rgb(255, 180, 20);
-    background: linear-gradient(100deg, rgba(255, 180, 20, 1) 40%, rgba(255, 129, 24, 1) 91%);
-    box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+    /*background: linear-gradient(100deg, rgba(255, 180, 20, 1) 40%, rgba(255, 129, 24, 1) 91%);*/
+    /*box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;*/
     border-radius: 6px;
 }
+
+.btn_warning:hover {
+    background: var(--yellow);
+    color: white;
+}
+
+.btn_warning:active {
+    background: black;
+}
+
 
 .btn_primary {
     color: white;
     background: rgb(8, 44, 80);
     background: linear-gradient(100deg, rgba(8, 44, 80, 1) 24%, rgba(25, 68, 102, 1) 100%);
-    box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+    border: 0;
 }
 
 .btn_primary:hover {
-    color: white;
+    color: #fff;
+    background: linear-gradient(100deg, rgba(37, 99, 151, 1) 0%, rgba(37, 99, 151, 1) 100%);
 }
 
 .oculto {

@@ -234,44 +234,51 @@ $d.addEventListener("DOMContentLoaded", function () {
 
     btnSendFiles.addEventListener('click', e => {
 
-        let csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        let url_view = "/project/fast_process/";
+        if (Object.keys(files_upload).length > 0) {
+            $d.querySelector('.blur-shadow').classList.add('shadow-loader');
+            $d.querySelector('.modal').style.zIndex = 1;
+            $d.querySelector('.modal-backdrop.show').style.zIndex = 0;
+            let csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            let url_view = "/project/fast_process/";
 
-        let formData = new FormData();
+            let formData = new FormData();
 
-        // Añadimos el csrf al formData
-        formData.append('csrfmiddlewaretoken', csrf);
+            // Añadimos el csrf al formData
+            formData.append('csrfmiddlewaretoken', csrf);
 
-        // Agregar cada archivo seleccionado al formData
-        for (let key in files_upload) {
-            formData.append(key, files_upload[key]);
+            // Agregar cada archivo seleccionado al formData
+            for (let key in files_upload) {
+                formData.append(key, files_upload[key]);
+            }
+
+
+            fetch(url_view,{
+                method: 'POST',
+                body : formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.redirect_url) {
+                    // Reenviar a la ruta de reportes con los datos del servidor, así mismo,
+                    // mandarle una descarga automática del archivo merged.
+
+                    window.location.href = data.redirect_url;
+                }
+
+
+            })
+            .catch(error => {
+                console.log('Error: ', error);
+            })
+
+
+
+            // Cerramos el modal.. aunque deberíamos dar retroalimentación de carga aquí o directamente en reporte con una animación de carga
+            // $d.querySelector('#añadir_manual .btn-close').click();
+
+        } else {
+            appendAlert("No haz seleccionado ningún archivo!", "warning");
         }
-
-
-        fetch(url_view,{
-            method: 'POST',
-            body : formData,
-        })
-        .then(response =>{
-            return response.json();
-
-        })
-        .then(data => {
-            console.log('Respuesta del server: ', data)
-
-            // Reenviar a la ruta de reportes con los datos del servidor, así mismo,
-            // mandarle una descarga automática del archivo merged.
-            // window.location.href= '/proyecto/revision/';
-
-        })
-        .catch(error => {
-            console.log('Error: ', error);
-        })
-
-
-
-        // Cerramos el modal.. aunque deberíamos dar retroalimentación de carga aquí o directamente en reporte con una animación de carga
-        // $d.querySelector('#añadir_manual .btn-close').click();
     })
 
 
