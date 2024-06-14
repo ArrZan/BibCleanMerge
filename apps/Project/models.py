@@ -5,6 +5,8 @@ from django.db import models
 
 from bibtexparser import bibdatabase as bd
 
+import bibtexparser as bparser
+
 import re
 
 
@@ -61,26 +63,95 @@ class ProjectFiles(models.Model):
         return f"""Cantidad de id's: {len(list_entry_id)}\nConteo de los tipos: {len(entries)}\nContador de objeas negras: {len(list_not_ID)}\nLista de obejas negras: {list_not_ID}
         """
 
-    def get_numbers_standard_types(self, entries):
-        # Creamos un diccionario con los standar type y un contador en 0
-        type_counts = {'article': 0,
-                       'book': 0,
-                       'conference': 0,
-                       'others': 0,
-                       }
+    # def get_numbers_standard_types(self, entries):
+    #     # Creamos un diccionario con los standar type y un contador en 0
+    #     type_counts = {'article': 0,
+    #                    'book': 0,
+    #                    'conference': 0,
+    #                    'others': 0,
+    #                    }
+    #
+    #     # Iteramos los entries del parser
+    #     for entry in entries:
+    #         entry_type = entry.get('ENTRYTYPE', '').lower()
+    #
+    #         # Sacamos la cantidad por cada tipo de entry (books, article, conferences, etc)
+    #         if entry_type in type_counts:
+    #             type_counts[entry_type] += 1
+    #         else:
+    #             type_counts['others'] += 1
+    #
+    #     # Esto es para TESTING (BORRAR)
+    #     for entry_type, count in type_counts.items():
+    #         print(f'{entry_type}: {count}')
+    #
+    #     return type_counts
+    #
 
-        # Iteramos los entries del parser
-        for entry in entries:
-            entry_type = entry.get('ENTRYTYPE', '').lower()
 
-            # Sacamos la cantidad por cada tipo de entry (books, article, conferences, etc)
-            if entry_type in type_counts:
-                type_counts[entry_type] += 1
-            else:
-                type_counts['others'] += 1
+class ProjectFile:
+    def __init__(self, file):
+        self.bib_database = ''
+        self.num_entry_parser = 0
+        self.sheeps_ids = []
+        self.white_sheeps_ids = []
+        self.black_sheeps_ids = []
+        self.num_sheeps = 0
+        self.num_black_sheeps = 0
+        self.type_counts = {
+            'article': 0,
+            'book': 0,
+            'conference': 0,
+            'booklet': 0,
+            'inbook': 0,
+            'incollection': 0,
+            'inproceedings': 0,
+            'manual': 0,
+            'mastersthesis': 0,
+            'misc': 0,
+            'phdthesis': 0,
+            'proceedings': 0,
+            'techreport': 0,
+            'unpublished': 0,
+        }
 
-        # Esto es para TESTING (BORRAR)
-        for entry_type, count in type_counts.items():
-            print(f'{entry_type}: {count}')
+        self.extract_data_file(file)
 
-        return type_counts
+    def extract_data_file(self, file):
+        fileBytes = file.read()
+        # Decodificamos el archivo para pasarle un regex y sacar el número total de entry's
+        file_content = fileBytes.decode('utf-8')
+
+        self.sheeps_ids = self.get_total_id_articles(file_content)
+        self.num_sheeps = len(self.sheeps_ids)
+        self.bib_database = bparser.loads(file_content)
+        self.num_entry_parser = len(self.bib_database.entries)
+
+    def get_type_entry(self, entry):
+        entry_type = entry.get('ENTRYTYPE', '').lower()
+
+        self.type_counts[entry_type] += 1
+
+        if entry_type == 'article' or entry_type == 'book' or entry_type == 'conference':
+            return entry_type
+        else:
+            return 'others'
+
+    def save_id_entry(self, entry):
+        entry_id = entry.get('ID', '')
+        self.white_sheeps_ids.append(entry_id)
+
+    def obtain_black_sheeps(self):
+        if self.num_sheeps != len(self.white_sheeps_ids):
+            set_S = set([sheep.group(1) for sheep in self.sheeps_ids])
+            set_WS = set(self.white_sheeps_ids)
+
+            self.black_sheeps_ids = list(set_S.symmetric_difference(set_WS))
+            self.num_black_sheeps = len(self.black_sheeps_ids)
+
+        return self.black_sheeps_ids
+
+    @staticmethod
+    def get_total_id_articles(decode_file):
+        return list(re.finditer(r'@\w+\{\s*(\S.+),', decode_file))
+

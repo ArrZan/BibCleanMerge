@@ -232,12 +232,20 @@ $d.addEventListener("DOMContentLoaded", function () {
 
     // ENVIAR ARCHIVOS SELECCIONADOS AL BACKEND PARA PROCESAMIENTO RÁPIDO ----------------------------------------------------------------
 
+    function blur_active() {
+        $d.querySelector('.blur-shadow').classList.add('shadow-loader');
+        $d.querySelector('.modal').style.zIndex = 4;
+        $d.querySelector('.modal-backdrop.show').style.zIndex = 2;
+    }
+
+    function blur_inactive() {
+        $d.querySelector('.blur-shadow').classList.remove('shadow-loader');
+    }
+
     btnSendFiles.addEventListener('click', e => {
 
         if (Object.keys(files_upload).length > 0) {
-            $d.querySelector('.blur-shadow').classList.add('shadow-loader');
-            $d.querySelector('.modal').style.zIndex = 1;
-            $d.querySelector('.modal-backdrop.show').style.zIndex = 0;
+
             let csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
             let url_view = "/project/fast_process/";
 
@@ -251,7 +259,8 @@ $d.addEventListener("DOMContentLoaded", function () {
                 formData.append(key, files_upload[key]);
             }
 
-
+            // Activamos pantalla de carga
+            blur_active();
             fetch(url_view,{
                 method: 'POST',
                 body : formData,
@@ -263,8 +272,12 @@ $d.addEventListener("DOMContentLoaded", function () {
                     // mandarle una descarga automática del archivo merged.
 
                     window.location.href = data.redirect_url;
+                } else if (data.error) {
+                    // Desactivamos pantalla de carga
+                    blur_inactive();
+                    console.log(data.error_message)
+                    appendAlert(data.error, "danger");
                 }
-
 
             })
             .catch(error => {

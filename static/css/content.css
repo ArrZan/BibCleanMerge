@@ -151,8 +151,8 @@ textarea,
         width: 0;
         display: flex !important;
         flex-direction: column;
-        right: 30px;
-        bottom: 30px;
+        right: 18px;
+        bottom: 10px;
         z-index: 1;
     }
 
