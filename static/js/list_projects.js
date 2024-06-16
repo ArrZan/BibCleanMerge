@@ -95,7 +95,7 @@ $d.addEventListener("DOMContentLoaded", function () {
 
     let files_upload = {};
     let contDict = 0;
-
+    let currentTotalSize = 0;
 
     // FUNCIÓN PARA AGREGAR ARCHIVOS -------------------------------------------------------------------------------------------
     function addFiles(arrayFile) {
@@ -107,6 +107,14 @@ $d.addEventListener("DOMContentLoaded", function () {
             
             // Verificar que el archivo tenga la extensión .bib
             if (file.name.endsWith('.bib')) {
+                // Calculamos el peso del archivo
+                const fileSizeMB = file.size / (1024 * 1024);
+
+                // Sumar el tamaño al peso total
+                currentTotalSize += fileSizeMB;
+
+                // Mostrar el peso total actualizado
+                updateTotalSizeElement();
     
                 // Agregamos el archivo a la variable
                 files_upload[len_files_upload] = file;
@@ -136,7 +144,14 @@ $d.addEventListener("DOMContentLoaded", function () {
                 fileElement.querySelector(".delete-file").addEventListener("click", function () {
                     // Obtener el key del archivo que se va a eliminar
                     const keyFile = this.getAttribute("data-file").split('/')[1];
-    
+
+                    // Restar el tamaño del archivo eliminado del peso total
+                    const fileSize = files_upload[keyFile].size / (1024 * 1024);
+                    currentTotalSize -= fileSize;
+
+                    // Mostrar el peso total actualizado
+                    updateTotalSizeElement();
+
                     /// Lo quitamos de la lista a enviar al form
                     delete files_upload[keyFile];
     
@@ -155,6 +170,13 @@ $d.addEventListener("DOMContentLoaded", function () {
         // Resetear el input de archivos para permitir nuevas selecciones
         fileInput.value = "";
     }
+
+    // Actualizamos el peso de todos los archivos subidos
+    function updateTotalSizeElement() {
+    const infoFiles = document.querySelector(".info-files");
+    if (infoFiles) {
+        infoFiles.querySelector('strong').textContent = `${currentTotalSize.toFixed(2)} MB`;
+    }}
 
 
     // BOTÓN PARA SUBIR ARCHIVOS DEL MODAL -------------------------------------------------------------------------------------------
@@ -261,6 +283,8 @@ $d.addEventListener("DOMContentLoaded", function () {
 
             // Activamos pantalla de carga
             blur_active();
+
+            // Mandamos a procesar
             fetch(url_view,{
                 method: 'POST',
                 body : formData,

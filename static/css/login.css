@@ -162,6 +162,7 @@ body {
 
 
 /* -------------------------------------------------------------------- QUERIES */
+/*VISTA HORIZONTAL EN CELULARK*/
 @media (max-width: 992px) and (max-width: 640px) {
     body {
         background: white;

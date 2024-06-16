@@ -90,14 +90,15 @@ class ProjectFiles(models.Model):
 
 
 class ProjectFile:
-    def __init__(self, file):
-        self.bib_database = ''
-        self.num_entry_parser = 0
+    def __init__(self):
         self.sheeps_ids = []
         self.white_sheeps_ids = []
         self.black_sheeps_ids = []
         self.num_sheeps = 0
+        self.num_white_sheeps = 0
         self.num_black_sheeps = 0
+        self.exist_b_sheep = False
+
         self.type_counts = {
             'article': 0,
             'book': 0,
@@ -115,17 +116,31 @@ class ProjectFile:
             'unpublished': 0,
         }
 
-        self.extract_data_file(file)
 
-    def extract_data_file(self, file):
+    @staticmethod
+    def decode_file(file):
         fileBytes = file.read()
         # Decodificamos el archivo para pasarle un regex y sacar el número total de entry's
-        file_content = fileBytes.decode('utf-8')
+        return fileBytes.decode('utf-8')
 
-        self.sheeps_ids = self.get_total_id_articles(file_content)
+    @staticmethod
+    def read_bibtext(file_decode):
+        bib_database = bparser.loads(file_decode)
+
+        for entry in bib_database.entries:
+            yield entry
+
+    def extract_data_file(self, file_decode):
+        self.get_sheeps(file_decode)
+        self.get_white_sheeps(file_decode)
+
         self.num_sheeps = len(self.sheeps_ids)
-        self.bib_database = bparser.loads(file_content)
-        self.num_entry_parser = len(self.bib_database.entries)
+        self.num_white_sheeps = len(self.white_sheeps_ids)
+        self.num_black_sheeps = self.num_sheeps - self.num_white_sheeps
+
+        self.exist_b_sheep = True if self.num_black_sheeps > 0 else False
+
+        self.obtain_black_sheeps()
 
     def get_type_entry(self, entry):
         entry_type = entry.get('ENTRYTYPE', '').lower()
@@ -137,21 +152,20 @@ class ProjectFile:
         else:
             return 'others'
 
-    def save_id_entry(self, entry):
-        entry_id = entry.get('ID', '')
-        self.white_sheeps_ids.append(entry_id)
+    def get_white_sheeps(self, file_decode):
+        for entry in self.read_bibtext(file_decode):
+            entry_id = entry.get('ID', '')
+            self.white_sheeps_ids.append(entry_id)
 
     def obtain_black_sheeps(self):
-        if self.num_sheeps != len(self.white_sheeps_ids):
+        if self.exist_b_sheep:
             set_S = set([sheep.group(1) for sheep in self.sheeps_ids])
+
             set_WS = set(self.white_sheeps_ids)
 
-            self.black_sheeps_ids = list(set_S.symmetric_difference(set_WS))
-            self.num_black_sheeps = len(self.black_sheeps_ids)
+            self.black_sheeps_ids = list(set_S.difference(set_WS))
 
-        return self.black_sheeps_ids
+    def get_sheeps(self, decode_file):
+        self.sheeps_ids = list(re.finditer(r'@\w+\{\s*(\S.+),', decode_file))
 
-    @staticmethod
-    def get_total_id_articles(decode_file):
-        return list(re.finditer(r'@\w+\{\s*(\S.+),', decode_file))
 

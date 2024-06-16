@@ -1,4 +1,6 @@
 import re
+import sys
+import time
 
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
@@ -261,6 +263,8 @@ class ProcesamientoView(View):
     @staticmethod
     def post(request, *args, **kwargs):
         try:
+            start_time = time.time()  # Tiempo de inicio de procesamiento
+
             # Tomamos los archivos del POST
             files = request.FILES
 
@@ -270,51 +274,64 @@ class ProcesamientoView(View):
                 if file_obj.name.endswith('.bib'):
                     files_bib.append(file_obj)
 
-            # Si existen archivos..
+            # Si existen archivos...
             if files_bib:
                 # Nombre y dirección de guardado del archivo
                 name_date = datetime.now().strftime("%Y%m%d%H%M%S")
-                nameFile = f'merged_{name_date}.bib'
-                filePath = os.path.join(settings.MEDIA_BIB, nameFile)
+                name_File = f'merged_{name_date}.bib'
+                file_Path = os.path.join(settings.MEDIA_BIB, name_File)
 
                 # dict de metricas de los tipos de entrada
-                count_entry_type_all = {'article': 0,
-                                        'book': 0,
-                                        'conference': 0,
-                                        'others': 0,
-                                        }
+                count_entry_type_all = {
+                    'article': 0,
+                    'book': 0,
+                    'conference': 0,
+                    'others': 0,
+                }
 
-                count_entry_all = 0  # contador de los entry por regex
-                black_sheeps_ids = []  # lista de todas las obejas
-                bib_database_all = []  # lista de entries (diccionarios)
+                sheeps_ids = 0  # contador de los entry por regex
+                white_sheeps_ids = 0  # contador de los entry por regex
+                black_sheeps_ids = []  # lista de todas las obejas negras
+    #               bib_database_all = []  # lista de entries (diccionarios)
 
+                contTitle = 1
                 for file in files_bib:
-                    filePath_black = os.path.join(settings.MEDIA_BIB, f'BSHEEP_{name_date}_{file.name}.txt')
-                    obj_entries = ProjectFile(file)
 
-                    # list_entry_id_all += obj_entries.sheeps_ids
-                    bib_database_all.append(obj_entries.bib_database.entries)
-                    count_entry_all += obj_entries.num_sheeps
+                    obj_entries = ProjectFile()
+                    file_decode = obj_entries.decode_file(file)
 
-                    for entry in obj_entries.bib_database.entries:
-                        # Obtengo el tipo de entrada y lo acumulo en el diccionario
+                    obj_entries.extract_data_file(file_decode)
+                    black_sheeps_ids += obj_entries.black_sheeps_ids
+
+                    list_formated = {}
+                    for entry in obj_entries.read_bibtext(file_decode):
+                        # Obtengo el tipo de entrada y lo acumulo en el diccionario (conteo de tipos de entrada)
                         type_entry = obj_entries.get_type_entry(entry)
                         count_entry_type_all[type_entry] += 1
 
-                        # Guardamos el id del entry
-                        obj_entries.save_id_entry(entry)
+                        formatedEntry = ProcesamientoView.format_bibtext_entry(entry, contTitle)
+                        # list_formated[contTitle] = ProcesamientoView.format_bibtext_entry(entry, contTitle)
 
-                    black_sheeps_ids += (obj_entries.obtain_black_sheeps())
+                        # escribir todas las entradas formateadas de una vez al final
+                        with open(file_Path, 'a', encoding="utf8") as f:
+                            f.write(formatedEntry)
+
+                        contTitle += 1
+
 
                     print("*" * 50)
                     print("Obejas: ", obj_entries.num_sheeps)
-                    print("Obejas blancas: ", len(obj_entries.white_sheeps_ids))
+                    print("Obejas blancas: ", obj_entries.num_white_sheeps)
                     print("Obejas negras: ", obj_entries.num_black_sheeps)
 
                     if obj_entries.num_black_sheeps > 0:
+                        filePath_black = os.path.join(settings.MEDIA_BIB, f'BSHEEP_{name_date}_{file.name}.txt')
                         with open(filePath_black, 'w') as f:
                             for id_ in obj_entries.black_sheeps_ids:
                                 f.write(id_ + "\n")
+
+                    sheeps_ids += obj_entries.num_sheeps
+                    white_sheeps_ids += obj_entries.num_white_sheeps
 
                 print("*" * 50)
                 print("*" * 50)
@@ -324,24 +341,32 @@ class ProcesamientoView(View):
                 for entry_type, count in count_entry_type_all.items():
                     print(f'{entry_type}: {count}')
 
-                # Le da una estructura general a los entry's
-                contTitle = 1
-                for entries in bib_database_all:
-                    for entry in entries:
-                        formatedEntry = ProcesamientoView.format_bibtext_entry(entry, contTitle)
-                        contTitle += 1
+                print("*" * 50)
+                print("Obejas: ", sheeps_ids)
+                print("Obejas blancas: ", white_sheeps_ids)
+                print("Obejas negras: ", len(black_sheeps_ids))
 
-                        with open(filePath, 'a', encoding="utf8") as f:
-                            f.write(formatedEntry)
+                size_File = os.path.getsize(file_Path)  # Tamaño de archivo
+                size_File /= (1024 * 1024)  # Tamaño de archivo en MB
+
+                end_time = time.time()  # Tiempo de finalización de procesamiento
+                elapsed_time = end_time - start_time  # Calcular tiempo transcurrido en segundos
+
+                minu = int(elapsed_time // 60)
+                sec = int(elapsed_time % 60)
+
+                formatted_time = f"{minu:02}:{sec:02} seg"  # Tiempo formateado
 
                 data = {
                     'count_typeEnt': count_entry_type_all,
-                    'count_entries': count_entry_all,
+                    'count_entries': sheeps_ids,
                     'count_process': contTitle - 1,
                     'count_duplicated': len(black_sheeps_ids),
                     'count_files': len(files_bib),
-                    'name_file': nameFile,
-                    'url_file': f'{settings.MEDIA_URL}/files/bib/{nameFile}'
+                    'name_file': name_File,
+                    'size_file': f'{size_File:.2f} MB',
+                    'url_file': f'{settings.MEDIA_URL}/files/bib/{name_File}',
+                    'elapsed_time': formatted_time,
                 }
 
                 # Guardar count_entry_type en la sesión
@@ -354,7 +379,18 @@ class ProcesamientoView(View):
             return JsonResponse({'redirect_url': reverse('report')})
 
         except Exception as e:
-            print("An exception occurred: ", e)
+            # Depuración
+            tipo_excepcion, valor_excepcion, tb = sys.exc_info()
+            print(f"Tipo de excepción: {tipo_excepcion}")
+            print(f"Valor de la excepción: {valor_excepcion}")
+            print("Traceback:")
+            traceback_details = {
+                'filename': tb.tb_frame.f_code.co_filename,
+                'line': tb.tb_lineno,
+                'name': tb.tb_frame.f_code.co_name,
+            }
+            for name, value in traceback_details.items():
+                print(f"  {name}: {value}")
 
             return JsonResponse({'error': 'Ocurrió un error en el servidor!',
                                  'error_message': str(e)}, status=500)
