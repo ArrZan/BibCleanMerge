@@ -17,7 +17,7 @@
                 <div class="col col-10">
                     <h2 class="mb-0">REPORTE DE PROYECTO</h2>
                 </div>
-                <div class="col h4 d-flex justify-content-end mb-0">
+                <div class="col col-2 h4 d-flex justify-content-end mb-0">
                         <a type="button" class="btn-close" aria-label="Close" href="{% url 'list_projects' %}"></a>
                 </div>
             </div>
@@ -36,7 +36,7 @@
 
 
 {#        ------------------------------------------- BODY DEL CONTAINER -------------------------------------------#}
-                <div class="row scrollable-row">
+                <div class="row scrollable-row scroll-styled">
 
     {#                ---------------------------- GRÁFICA DE REPORTE ----------------------------#}
                     <div class="col-12 col-lg-7 container_pastel">
@@ -45,9 +45,7 @@
                             <div class="col">
                                 <div class="box-metrics">
                                     <h4 class="text-center">Tipos de entradas</h4>
-                                    <center>
-                                        <canvas id="grafica"></canvas>
-                                    </center>
+                                    <svg></svg>
                                 </div>
                             </div>
                         </div>
@@ -208,6 +206,7 @@
         var var_dataReport = JSON.parse(document.getElementById('report').textContent);
     </script>
     
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="{% static "js/menu.js" %}"></script>
     <script src="{% static "js/reporte.js" %}"></script>
 {% endblock js %}

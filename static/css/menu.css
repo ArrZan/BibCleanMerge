@@ -241,13 +241,15 @@ body {
 .scroll-styled::-webkit-scrollbar,
 .sidebar .items::-webkit-scrollbar {
     width: 7px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .3s ease, visibility .3s ease;
 }
 .scroll-styled::-webkit-scrollbar-thumb,
 .sidebar .items::-webkit-scrollbar-thumb {
     background-color: var(--blue);
     border-radius: 10px;
 }
-
 
 /* -------------------------------------------------------------------- QUERIES */
 /*vista horizontal*/
@@ -276,7 +278,7 @@ body {
     }
 
     .sidebar {
-        position: absolute;
+        position: fixed;
         width: 85%;
         background: rgb(8, 44, 80);
         background: linear-gradient(4deg, rgba(8, 44, 80, 1) 37%, rgba(25, 68, 102, 1) 100%);

@@ -282,12 +282,7 @@ class ProcesamientoView(View):
                 file_Path = os.path.join(settings.MEDIA_BIB, name_File)
 
                 # dict de metricas de los tipos de entrada
-                count_entry_type_all = {
-                    'article': 0,
-                    'book': 0,
-                    'conference': 0,
-                    'others': 0,
-                }
+                count_entry_type_all = {}
 
                 sheeps_ids = 0  # contador de los entry por regex
                 white_sheeps_ids = 0  # contador de los entry por regex
@@ -307,7 +302,11 @@ class ProcesamientoView(View):
                     for entry in obj_entries.read_bibtext(file_decode):
                         # Obtengo el tipo de entrada y lo acumulo en el diccionario (conteo de tipos de entrada)
                         type_entry = obj_entries.get_type_entry(entry)
-                        count_entry_type_all[type_entry] += 1
+
+                        if type_entry not in count_entry_type_all:
+                            count_entry_type_all[type_entry] = 1
+                        else:
+                            count_entry_type_all[type_entry] += 1
 
                         formatedEntry = ProcesamientoView.format_bibtext_entry(entry, contTitle)
                         # list_formated[contTitle] = ProcesamientoView.format_bibtext_entry(entry, contTitle)
