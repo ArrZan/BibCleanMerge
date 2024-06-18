@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import LoginUserView, RegisterUserView
+from .views import RegisterUserView, CustomPasswordResetView
 
 urlpatterns = [
     # modulos/inicio
-    path('', LoginUserView.as_view(), name='login'),
     path('register/', RegisterUserView.as_view(), name='register'),
+    path('accounts/password_reset/', CustomPasswordResetView.as_view(), name='password_reset'),
 ]

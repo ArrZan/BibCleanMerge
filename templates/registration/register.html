@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block cssCustoms %}
+	<link rel="stylesheet" href="{% static "css/login.css" %}">
+{% endblock %}
+
+
+<!-- contenido de la pagina -->
+{% block main %}
+	<div class="container" id="form-reg">
+		<div class="card" style="max-width: 740px;">
+			<div class="row g-0">
+				<div class="col-md-5">
+					<img src="{% static "img/logo/logo_login.svg" %}" class="img-fluid rounded-start" alt="...">
+				</div>
+				<div class="col-md-7 text-center">
+					<div class="card-body d-flex justify-content-center align-items-center flex-column">
+						<form action="" method="post" enctype="multipart/form-data">
+							{% csrf_token %}
+							<h2 class="card-title"><strong>Registro</strong> de Usuario</h2>
+
+							<p class="card-text mb-4"><small class="text-body-secondary">¡Crea tu cuenta ya!</small></p>
+							<div class="row gx-md-2 mb-3">
+
+								<div class="col-md-6">
+									<div class="input-group">
+                                    <span class="input-group-text" id="basic-addon1">
+                                        <i class="bi bi-person-fill"></i>
+                                    </span>
+										<input type="text" id="id_username" class="form-control" placeholder="Usuario"
+										       aria-label="Usuario" name="username"
+										       aria-describedby="basic-addon1">
+									</div>
+								</div>
+
+								<div class="col-md-6">
+									<div class="input-group">
+                                    <span class="input-group-text" id="basic-addon1">
+                                        <i class="bi bi-person-vcard-fill"></i>
+                                    </span>
+										<input type="text" id="id_first_name" class="form-control"
+										       placeholder="Nombres"
+										       name="first_name"
+										       aria-describedby="basic-addon1">
+									</div>
+								</div>
+
+								<div class="col-md-12">
+									<div class="input-group">
+                                    <span class="input-group-text" id="basic-addon1">
+                                        <i class="bi bi-person-vcard-fill"></i>
+                                    </span>
+										<input type="text" id="id_last_name" class="form-control"
+										       placeholder="Apellidos"
+										       name="last_name">
+									</div>
+								</div>
+
+								<div class="col-md-12">
+									<div class="input-group">
+                                    <span class="input-group-text" id="basic-addon1">
+                                        <i class="bi bi-envelope-fill"></i>
+                                    </span>
+										<input type="email" id="id_email" class="form-control" placeholder="example@dominio
+										.com"
+										       name="email">
+									</div>
+								</div>
+
+								<div class="col-md-6">
+									<div class="input-group">
+                                    <span class="input-group-text" id="basic-addon1">
+                                        <i class="bi bi-key-fill"></i>
+                                    </span>
+										<input type="password" id="id_password1" class="form-control"
+										       placeholder="Contraseña"
+										       name="password1">
+									</div>
+								</div>
+
+								<div class="col-md-6">
+									<div class="input-group">
+                                    <span class="input-group-text" id="basic-addon1">
+                                        <i class="bi bi-key-fill"></i>
+                                    </span>
+										<input type="password" id="id_password2" class="form-control"
+										       placeholder="Repetir Contraseña"
+										       name="password2">
+									</div>
+								</div>
+
+								<div class="col-md-12">
+									<div class="input-group">
+										<input type="file" name="profile_picture" accept="image/*"
+										       class="form-control"
+										       id="id_profile_picture">
+
+									</div>
+								</div>
+
+
+							</div>
+							<button type="submit" class="btn btn-primary mt-2">Crear cuenta</button>
+							<p class="card-text"><small class="text-body-secondary">¿Ya tienes una cuenta?, <a
+									href="{% url 'login' %}">inicia sesión!</a></small></p>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	{% if form.errors %}
+		<div class="toast show position-fixed top-0 start-50 translate-middle-x" role="alert"
+		     aria-live="assertive" aria-atomic="true" data-delay="5000" style="z-index: 1050;">
+			<div class="toast-header">
+				<strong class="me-auto">Error al Grabar</strong>
+				<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+			</div>
+			<div class="toast-body">
+				{{ form.errors }}
+			</div>
+		</div>
+
+		<script>
+            // Mostrar el toast cuando la página cargue
+            document.addEventListener('DOMContentLoaded', function () {
+                var toastEl = document.querySelector('.toast');
+                var toast = new bootstrap.Toast(toastEl); // Inicializar el toast de Bootstrap
+
+                toast.show(); // Mostrar el toast
+
+                // Ocultar el toast después de 5 segundos
+                setTimeout(function () {
+                    toast.hide();
+                }, 5000);
+            });
+		</script>
+	{% endif %}
+{% endblock %}

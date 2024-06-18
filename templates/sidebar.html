@@ -13,12 +13,12 @@
 
             <div class="header">
                 <div class="user_img">
-                    <img class="image_perfil" src="{% static "img/perfil/default.jpg" %}" alt="Imagen usuario">
+                    <img class="image_perfil" src="{{ user.profile_picture.url }}" alt="Imagen usuario">
                 </div>
 
                 <div class="dato_personal">
-                    <h3 class="text text-center mb-0">Usuario</h3>
-                    <small class="text-center">example@domine.com</small>
+                    <h3 class="text text-center mb-0">{{ user.first_name }} {{ user.last_name }}</h3>
+                    <small class="text-center">{{ user.email }}</small>
                 </div>
             </div>
 
@@ -40,7 +40,7 @@
             <div class="footer">
 
                 <div class="items">
-                    <a class="item" href="#">
+                    <a class="item" href="{% url 'logout' %}">
                         <i class="bi bi-box-arrow-left"></i>
                         <span class="text">Cerrar sesión</span>
                     </a>
