@@ -9,6 +9,8 @@ import bibtexparser as bparser
 
 import re
 
+from apps.Project.libs import PurgeData
+
 
 # class Project(models.Model):
 #     id_project = models.IntegerField(primary_key=True)
@@ -116,7 +118,6 @@ class ProjectFile:
             'unpublished': 0,
         }
 
-
     @staticmethod
     def decode_file(file):
         fileBytes = file.read()
@@ -168,4 +169,64 @@ class ProjectFile:
     def get_sheeps(self, decode_file):
         self.sheeps_ids = list(re.finditer(r'@\w+\{\s*(\S.+),', decode_file))
 
+    def unificar_entradas(self, file_decode, Obj_PurgeData):
 
+        for entry in self.read_bibtext(file_decode):
+            # Obtengo el tipo de entrada y lo acumulo en el diccionario (conteo de tipos de entrada)
+            type_entry = self.get_type_entry(entry)
+
+            if type_entry not in Obj_PurgeData.count_entry_type_all:
+                Obj_PurgeData.count_entry_type_all[type_entry] = 1
+            else:
+                Obj_PurgeData.count_entry_type_all[type_entry] += 1
+
+            # Se controla lo que son el título y autor, se los convierte a minúscula
+            # para evitar problemas en la comparación
+            title = entry['title'].lower()
+            author = entry['author'].lower()
+
+            # Lo guardamos en una tupla para meterlo como clave en el diccionario
+            clave = (title, author, entry['year'])
+
+            # Si no está la clave, esta ingresa como única junto con el entry
+            if clave not in Obj_PurgeData.entradas_unicas:
+                Obj_PurgeData.entradas_unicas[clave] = entry
+            else:
+                # Si es una clave repetida, se los manda a combinar
+                Obj_PurgeData.entradas_unicas[clave] = self.combinar_entradas(Obj_PurgeData.entradas_unicas[clave], entry)
+
+            Obj_PurgeData.contArt += 1
+
+    def combinar_entradas(self, e1, e2):
+        # Combina las dos entradas añadiendo los campos faltantes de e1 con los de e2
+        for key, value in e2.items():
+            if key not in e1 or not e1[key]:
+                e1[key] = value
+            elif key == 'keywords':
+                keywords_e1 = set(e1[key].split(', '))
+                keywords_e2 = set(e2[key].split(', '))
+                combined_keywords = self.normalizar_keywords(', '.join(keywords_e1.union(keywords_e2)),
+                                                             keywords_e1.union(keywords_e2))
+                e1[key] = combined_keywords.title()
+        return e1
+
+    def normalizar_keywords(self, keywords, expanded_keywords):
+        # Convierte las keywords a minúsculas, expande abreviaturas,
+        # elimina espacios adicionales y las ordena alfabéticamente
+        if isinstance(keywords, str):
+            keywords = keywords.split(',')
+        keywords_normalizadas = set()
+        for kw in keywords:
+            kw_normalizada = re.sub(r'\s+', ' ', kw.strip().lower())
+            kw_normalizada = re.sub(r'[^\w\s]+$', '', kw_normalizada)
+            kw_expandidas = self.expandir_abreviatura(kw_normalizada, expanded_keywords)
+            keywords_normalizadas.add(kw_expandidas)
+        return ', '.join(sorted(keywords_normalizadas))
+
+    @staticmethod
+    def expandir_abreviatura(keyword, expanded_keywords):
+        # Expande las abreviaturas en las keywords
+        for expanded in expanded_keywords:
+            if keyword == ''.join([word[0] for word in expanded.split()]):
+                return expanded
+        return keyword

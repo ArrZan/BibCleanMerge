@@ -26,18 +26,18 @@ const color = d3.scaleOrdinal(["rgba(8,44,80,1)", "rgba(37, 99, 151, 1)", "rgba(
 const pie = d3.pie()
     .sort(null)
     .value(d => d.value)
-    .padAngle(0);
+    .padAngle(0);  // Espaciado entre los fragmentos del pastel
 
 
 //  Especificamos el radio interno y externo del arco del pastel
 const path = d3.arc()
     .innerRadius(0) // Radio interno
-    .outerRadius(Math.min(width, height) / 2.8); // Radio externo
+    .outerRadius(Math.min(width, height) / 2.45); // Radio externo
 
 
 const label = d3.arc()
-    .outerRadius(radius - 25) // Radio de las leyendas externo
-    .innerRadius(radius - 25); // Radio de las leyendas interna
+    .outerRadius(radius - 10) // Radio de las leyendas externo
+    .innerRadius(radius - 10); // Radio de las leyendas interna
 
 
 
@@ -58,7 +58,10 @@ function drawChart() {
 
     arcEnter.append("path")
         .attr("d", path)
-        .attr("fill", d => color(d.data.label));
+        .attr("fill", d => color(d.data.label))
+        .on("mouseover", function(event, d) {
+            d3.select(this.parentNode).raise();
+        });
 
     // Agregar texto con fondo usando foreignObject
     arcEnter.append("foreignObject")

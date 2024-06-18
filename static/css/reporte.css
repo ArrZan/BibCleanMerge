@@ -20,7 +20,7 @@
 .cont-report .box-metrics {
     background-color: white;
     border-radius: 8px;
-    box-shadow: rgba(0, 0, 0, 0.24) 0 3px 8px;
+    box-shadow: rgba(0, 0, 0, 0.24) 5px 5px 6px;
     padding: 7px 15px;
     margin-bottom: 1.5rem;
     position: relative;
@@ -157,6 +157,7 @@
     font-weight: bold;
     color: white;
     opacity: 0;
+    user-select: none;
 
     transition: opacity .3s ease;
 }
