@@ -2,12 +2,14 @@ import re
 import sys
 import time
 
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.views.generic import ListView, TemplateView, View
+from django.utils.decorators import method_decorator
+from django.views.generic import ListView, TemplateView, View, DetailView
 
-from apps.Project.models import ProjectFiles, ProjectFile
+from apps.Project.models import ProjectFiles, ProjectFile, Project, Report
 from main import settings
 
 # Importanción de librería para parsear los archivos bib
@@ -23,19 +25,34 @@ from apps.Project.libs import PurgeData
 """
 
 
-class ListProjectsView(TemplateView):
+@method_decorator(login_required, name='dispatch')
+class ListProjectsView(ListView):
     template_name = 'Project/list_Projects.html'
-    success_url = 'login'
+    model = Project
 
-    # def dispatch(self, request, *args, **kwargs):
-    #     if request.user.is_authenticated:
-    #         return redirect(self.success_url)
-    #
-    #     return super().dispatch(request, *args, **kwargs)
+    def get_queryset(self):
+        return Project.objects.filter(id_usuario=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Proyectos'
+        return context
+
+
+
+"""
+---------------------------------------------------------------------- Lista de proyectos
+"""
+
+
+@method_decorator(login_required, name='dispatch')
+class ReportDetailView(DetailView):
+    template_name = 'Project/detail_report.html'
+    model = Report
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = f'Reporte de proceso'
         return context
 
 
@@ -125,10 +142,13 @@ class ProcesamientoView(View):
                 print("Obejas negras: ", len(purge.black_sheeps_ids))
                 print("*" * 50)
                 print("Entradas únicas: ")
-                # print(purge.entradas_unicas)
 
-                # size_File = os.path.getsize(file_Path)  # Tamaño de archivo
-                # size_File /= (1024 * 1024)  # Tamaño de archivo en MB
+                for entry, value in purge.entradas_unicas.items():
+                    with open(file_Path, 'a', encoding="utf8") as f:
+                        f.write(f'{entry}: {value}\n')
+
+                size_File_bytes = os.path.getsize(file_Path)  # Tamaño de archivo
+                size_File = size_File_bytes / (1024 * 1024)  # Tamaño de archivo en MB
 
                 end_time = time.time()  # Tiempo de finalización de procesamiento
                 elapsed_time = end_time - start_time  # Calcular tiempo transcurrido en segundos
@@ -145,21 +165,48 @@ class ProcesamientoView(View):
                     'count_duplicated': len(purge.black_sheeps_ids),
                     'count_files': len(files_bib),
                     'name_file': name_File,
-                    'size_file': f'000000 MB',
-                    'url_file': f'0000000',
-                    # 'size_file': f'{size_File:.2f} MB',
-                    # 'url_file': f'{settings.MEDIA_URL}/files/bib/{name_File}',
+                    # 'size_file': f'000000 MB',
+                    # 'url_file': f'0000000',
+                    'size_file': f'{size_File:.2f} MB',
+                    'url_file': f'{settings.MEDIA_URL}/files/bib/{name_File}',
                     'elapsed_time': formatted_time,
                 }
 
                 # Guardar count_entry_type en la sesión
-                request.session['dataSet'] = data
+                # request.session['dataSet'] = data
+
+                # Crear el proyecto con un título y descripción predeterminados
+                new_project = Project.objects.create(
+                    id_usuario=request.user,
+                    prj_name='Proyecto',
+                    prj_description='Descripción predeterminada del proyecto',
+                )
+
+                # Crear el reporte asociado a este proyecto
+                newReport = Report.objects.create(
+                    id_project=new_project,
+                    rep_p_articles=purge.count_entry_type_all.get('article', 0),
+                    rep_p_conferences=purge.count_entry_type_all.get('conference', 0),
+                    rep_p_papers=purge.count_entry_type_all.get('paper', 0),
+                    rep_p_books=purge.count_entry_type_all.get('book', 0),
+                    rep_p_others=purge.count_entry_type_all.get('others', 0),
+                    rep_n_articles_files=purge.sheeps_ids,
+                    rep_n_processed=purge.contArt - 1,
+                    rep_n_duplicate=len(purge.black_sheeps_ids),
+                    rep_duration_seg=elapsed_time,
+                    rep_n_files=len(files_bib),
+                    rep_size_file=size_File_bytes,
+                    rep_name_file_merged=name_File
+                )
+
+                # Redirigimos a la vista de detalle del reporte
+                return JsonResponse({'redirect_url': reverse('report_detail', kwargs={'pk': newReport.id})})
 
             else:
                 # Si no se encontraron archivos válidos en el formato BIB, devuelve un mensaje de error
                 return JsonResponse({'error': 'No hay archivos subidos o no tienen el formato bib!'})
 
-            return JsonResponse({'redirect_url': reverse('report')})
+            # return JsonResponse({'redirect_url': reverse('report')})
 
         except Exception as e:
             # Depuración

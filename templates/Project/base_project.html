@@ -26,7 +26,7 @@
 
                 <div class="user_img">
 {#                    Colocar el get_image del user #}
-                    <img class="image_perfil" src="{% static 'img/perfil/default.jpg' %}" alt="Logo de usuario">
+                    <img class="image_perfil" src="{{ user.profile_picture.url }}" alt="Logo de usuario">
                 </div>
 
                 <div class="navbar-btn">

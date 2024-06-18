@@ -29,7 +29,7 @@
 {#        ------------------------------------------- HEADER DEL CONTAINER -------------------------------------------#}
                 <div class="row">
                     <div class="col mb-3">
-                        <h5 class="card-title">Proyecto ABCDE.</h5>
+                        <h5 class="card-title">{{ object.id_project.prj_name }}</h5>
                         <p class="card-text">Informe de los resultados del procesamiento.</p>
                     </div>
                 </div>
@@ -60,7 +60,7 @@
                                 <div class="box-metrics">
                                     <p>Articulos de archivos</p>
                                     <i class="bi bi-file-earmark-text-fill"></i>
-                                    <h1 class="text-center valores">{{ dataReport.count_entries }}</h1>
+                                    <h1 class="text-center valores">{{ object.rep_n_articles_files }}</h1>
                                 </div>
                             </div>
 
@@ -68,7 +68,7 @@
                                 <div class="box-metrics bg_primary">
                                     <p>Artículos procesados</p>
                                     <i class="bi bi-file-earmark-check-fill"></i>
-                                    <h1 class="text-center valores">{{ dataReport.count_process }}</h1>
+                                    <h1 class="text-center valores">{{ object.rep_n_processed }}</h1>
                                 </div>
                             </div>
                         </div>
@@ -79,7 +79,7 @@
                                 <div class="box-metrics">
                                     <p>Articulos Duplicados</p>
                                     <i class="bi bi-files"></i>
-                                    <h1 class="text-center valores">{{ dataReport.count_duplicated }}</h1>
+                                    <h1 class="text-center valores">{{ object.rep_n_duplicate }}</h1>
                                 </div>
                             </div>
 
@@ -87,7 +87,7 @@
                                 <div class="box-metrics">
                                     <p>Archivos integrados</p>
                                     <i class="bi bi-folder-fill"></i>
-                                    <h1 class="text-center valores">{{ dataReport.count_files }}</h1>
+                                    <h1 class="text-center valores">{{ object.rep_n_files }}</h1>
                                 </div>
                             </div>
                         </div>
@@ -111,15 +111,15 @@
                                                 </div>
                                                 <div class="col col-9 info-merged">
                                                     <div class="name-merged"><strong>Datos de proceso:</strong></div>
-                                                    <div class="time-process">Duración: <strong>{{ dataReport.elapsed_time }}</strong></div>
-                                                    <div class="size-file">Tamaño: <strong>{{ dataReport.size_file }}</strong></div>
+                                                    <div class="time-process">Duración: <strong>{{ object.get_formated_duration }}</strong></div>
+                                                    <div class="size-file">Tamaño: <strong>{{ object.get_size }}</strong></div>
                                                 </div>
                                             </div>
 
                                         </div>
 
                                         <div class="col-12 col-xl-4 my-2 my-xl-auto d-flex justify-content-center align-items-center">
-                                            <a class="btn btn_warning col-9 col-xl" href="{{ dataReport.url_file }}" download>
+                                            <a class="btn btn_warning col-9 col-xl" href="{{ object.get_file_path }}" download>
                                                 <i class="bi bi-download me-2"></i>
                                                 <p>Descargar</p>
                                             </a>
@@ -200,7 +200,7 @@
 
 {% block js %}
     <a id="report" type="application/json">
-    {{ dataReport|json_script:"report" }}
+    {{ object.get_count_types|json_script:"report" }}
     </a>
     <script>
         var var_dataReport = JSON.parse(document.getElementById('report').textContent);

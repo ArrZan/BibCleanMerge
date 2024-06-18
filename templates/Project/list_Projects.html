@@ -52,206 +52,80 @@
                 <div class="row body scroll-st scroll-style">
                     <!-- <h5 style="margin-top:5px;">Aún no tienes proyectos.</h5> -->
                     <div class="items">
-                        <div class="item" data-project-id="1">
+                        {% if object_list %}
+                        {% for object in object_list %}
+                        	<div class="item" data-project-id="{{ object.id }}">
 
-                            <a class="col1" href="#">
-                                <span class="title-pj">Proyecto ABC</span>
-                            </a>
+                                <a class="col1" href="#">
+                                    <span class="title-pj">{{ object.prj_name }}</span>
+                                </a>
 
-                            <div class="col2">
-                                <div class="row1">
+                                <div class="col2">
+                                    <div class="row1">
 
 
-                                    <div class="text col1">
-                                        <div class="num-pj">3500</div>
-                                    </div>
+                                        <div class="text col1">
+                                            <div class="num-pj">{{ object.get_last_report.rep_n_articles_files }}</div>
+                                        </div>
 
-                                    <div class="text col2">
-                                        <div class="date-pj">28/02/2024</div>
-                                    </div>
+                                        <div class="text col2">
+                                            <div class="date-pj">{{ object.prj_date|date:"d-m-Y" }}</div>
+                                        </div>
 
-                                    <div class="menu-options col3">
-                                        <button class="btn btn-options" onclick="showOptions(this)">
-                                            <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
+                                        <div class="menu-options col3">
+                                            <button class="btn btn-options" onclick="showOptions(this)">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
 
-                                        <div class="options">
-                                            <div class="dropdown-option">
-                                                <a class="btn btn-bar btn-down">
-                                                    <i class="bi bi-clipboard2-data-fill"></i>
-                                                    <span class="text">Ver reportes</span>
+                                            <div class="options">
+                                                <div class="dropdown-option">
+                                                    <a class="btn btn-bar btn-down" href="">
+                                                        <i class="bi bi-clipboard2-data-fill"></i>
+                                                        <span class="text">Ver reportes</span>
+                                                    </a>
+                                                    <a class="btn btn-bar" href="{% url 'report_detail'  object.get_last_report.id  %}">
+                                                        <i class="bi bi-bar-chart-line-fill"></i>
+                                                        <span class="text">Ver último reporte</span>
+                                                    </a>
+                                                </div>
+                                                <a class="btn btn-download" href="{{ object.get_last_report.rep_name_file_merged }}">
+                                                    <i class="bi bi-file-earmark-arrow-down-fill"></i>
+                                                    <span class="text">Descargar merged</span>
                                                 </a>
-                                                <a class="btn btn-bar" href="#">
-                                                    <i class="bi bi-bar-chart-line-fill"></i>
-                                                    <span class="text">Ver último reporte</span>
-                                                </a>
+                                                <button class="btn btn-trash" data-bs-toggle="modal" data-bs-target="#delete-project" data-project-id="{{ object.id }}" onclick="showDeleteModal(this)">
+                                                    <i class="bi bi-trash-fill"></i>
+                                                    <span class="text">Eliminar</span>
+                                                </button>
                                             </div>
-                                            <button class="btn btn-download">
-                                                <i class="bi bi-file-earmark-arrow-down-fill"></i>
-                                                <span class="text">Descargar merged</span>
-                                            </button>
-                                            <button class="btn btn-trash" data-bs-toggle="modal" data-bs-target="#delete-project" data-project-id="1" onclick="showDeleteModal(this)">
-                                                <i class="bi bi-trash-fill"></i>
-                                                <span class="text">Eliminar</span>
-                                            </button>
+                                        </div>
+
+                                    </div>
+
+
+
+                                    <div class="row2 scroll-st scroll-style">
+                                        <div class="text">
+                                            <div class="desc-pj">{{ object.prj_description }}</div>
                                         </div>
                                     </div>
 
                                 </div>
 
-
-
-                                <div class="row2 scroll-st scroll-style">
-                                    <div class="text">
-                                        <div class="desc-pj">Lorem ipsum, dolor sit amet consectetur adipisicing
-                                            elit. Dicta adipisci nemo explicabo porro dolorem quas iure quo
-                                            aliquam a at odio nostrum totam numquam cumque fuga, natus ea
-                                            necessitatibus libero.</div>
-                                    </div>
-                                </div>
+                                <button class="eye-float" onclick="showDescription(this)">
+                                    <i class="bi bi-eye-fill"></i>
+                                    <i class="bi bi-eye-slash-fill"></i>
+                                </button>
 
                             </div>
-
-                            <button class="eye-float" onclick="showDescription(this)">
-                                <i class="bi bi-eye-fill"></i>
-                                <i class="bi bi-eye-slash-fill"></i>
-                            </button>
-
-                        </div>
-
-                        <div class="item" data-project-id="2">
-
-                            <a class="col1" href="#">
-                                <span class="title-pj">Proyecto DEF</span>
-                            </a>
-
-                            <div class="col2">
-                                <div class="row1">
-
-
-                                    <div class="text col1">
-                                        <div class="num-pj">3500</div>
-                                    </div>
-
-                                    <div class="text col2">
-                                        <div class="date-pj">28/02/2024</div>
-                                    </div>
-
-                                    <div class="menu-options col3">
-                                        <button class="btn btn-options" onclick="showOptions(this)">
-                                            <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
-
-                                        <div class="options">
-                                            <div class="dropdown-option">
-                                                <a class="btn btn-bar btn-down">
-                                                    <i class="bi bi-clipboard2-data-fill"></i>
-                                                    <span class="text">Ver reportes</span>
-                                                </a>
-                                                <a class="btn btn-bar" href="#">
-                                                    <i class="bi bi-bar-chart-line-fill"></i>
-                                                    <span class="text">Ver último reporte</span>
-                                                </a>
-                                            </div>
-                                            <button class="btn btn-download">
-                                                <i class="bi bi-file-earmark-arrow-down-fill"></i>
-                                                <span class="text">Descargar merged</span>
-                                            </button>
-                                            <button class="btn btn-trash" data-bs-toggle="modal" data-bs-target="#delete-project" data-project-id="2" onclick="showDeleteModal(this)">
-                                                <i class="bi bi-trash-fill"></i>
-                                                <span class="text">Eliminar</span>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-
-
-                                <div class="row2 scroll-st scroll-style">
-                                    <div class="text">
-                                        <div class="desc-pj">Lorem ipsum, dolor sit amet consectetur adipisicing
-                                            elit. Dicta adipisci nemo explicabo porro dolorem quas iure quo
-                                            aliquam a at odio nostrum totam numquam cumque fuga, natus ea
-                                            necessitatibus libero.</div>
-                                    </div>
-                                </div>
-
+                        {% endfor %}
+                        {% else %}
+                            <div class="non-image">
+                                <img src="{% static 'img/utils/non_file.svg' %}" alt="Imagen de que no existen archivos">
+                                <h5>No hay Proyectos creados, <a href="#">¿Deseas agregar un proyecto?</a></h5>
+                                <a href="https://www.freepik.es/vector-gratis/agregar-ilustracion-concepto-archivos_5461692.htm#from_view=detail_alsolike">Imagen de storyset en Freepik</a>
                             </div>
+                        {% endif %}
 
-                            <button class="eye-float" onclick="showDescription(this)">
-                                <i class="bi bi-eye-fill"></i>
-                                <i class="bi bi-eye-slash-fill"></i>
-                            </button>
-
-                        </div>
-
-                        <div class="item" data-project-id="3">
-
-                            <a class="col1" href="#">
-                                <span class="title-pj">Proyecto GHI</span>
-                            </a>
-
-                            <div class="col2">
-                                <div class="row1">
-
-
-                                    <div class="text col1">
-                                        <div class="num-pj">3500</div>
-                                    </div>
-
-                                    <div class="text col2">
-                                        <div class="date-pj">28/02/2024</div>
-                                    </div>
-
-                                    <div class="menu-options col3">
-                                        <button class="btn btn-options" onclick="showOptions(this)">
-                                            <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
-
-                                        <div class="options">
-                                            <div class="dropdown-option">
-                                                <a class="btn btn-bar btn-down">
-                                                    <i class="bi bi-clipboard2-data-fill"></i>
-                                                    <span class="text">Ver reportes</span>
-                                                </a>
-                                                <a class="btn btn-bar" href="#">
-                                                    <i class="bi bi-bar-chart-line-fill"></i>
-                                                    <span class="text">Ver último reporte</span>
-                                                </a>
-                                            </div>
-                                            <button class="btn btn-download">
-                                                <i class="bi bi-file-earmark-arrow-down-fill"></i>
-                                                <span class="text">Descargar merged</span>
-                                            </button>
-                                            <button class="btn btn-trash" data-bs-toggle="modal" data-bs-target="#delete-project" data-project-id="3" onclick="showDeleteModal(this)">
-                                                <i class="bi bi-trash-fill"></i>
-                                                <span class="text">Eliminar</span>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-
-
-                                <div class="row2 scroll-st scroll-style">
-                                    <div class="text">
-                                        <div class="desc-pj">Lorem ipsum, dolor sit amet consectetur adipisicing
-                                            elit. Dicta adipisci nemo explicabo porro dolorem quas iure quo
-                                            aliquam a at odio nostrum totam numquam cumque fuga, natus ea
-                                            necessitatibus libero.</div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <button class="eye-float" onclick="showDescription(this)">
-                                <i class="bi bi-eye-fill"></i>
-                                <i class="bi bi-eye-slash-fill"></i>
-                            </button>
-
-                        </div>
 
 
                     </div>

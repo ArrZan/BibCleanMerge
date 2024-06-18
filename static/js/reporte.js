@@ -1,7 +1,7 @@
 
 // Aquí va la data que traemos del backend, hacemos un mapping para mandarlo como D3 requiere
-const data = Object.keys(var_dataReport['count_typeEnt']).map(function(key) {
-    return { label: key, value: var_dataReport['count_typeEnt'][key]};
+const data = Object.keys(var_dataReport).map(function(key) {
+    return { label: key, value: var_dataReport[key]};
 });
 
 

@@ -16,6 +16,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# VARIABLES DE REDIRECT
+LOGIN_REDIRECT_URL = '/project/list/'
+LOGOUT_REDIRECT_URL = '/'
+
 
 # Application definition
 
@@ -31,6 +35,8 @@ INSTALLED_APPS = [
     # Apps Login
     "apps.Login.apps.LoginConfig",
     "apps.User.apps.UserConfig",
+
+    # Apps Project
     "apps.Project.apps.ProjectConfig"
 
 
@@ -67,17 +73,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'main.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 
 DATABASES = {
     'default': {
@@ -157,3 +152,14 @@ PHOTO_USER_EMPTY = 'img/perfil/default.jpg'
 
 # Tamaño máximo para archivos subidos en bytes (por defecto 2.5MB)
 FILE_UPLOAD_MAX_MEMORY_SIZE = 2621440  # 2.5MB
+
+
+AUTH_USER_MODEL = 'Login.User'
+
+# Configuraciones para conexión con un correo
+EMAIL_USE_SSL = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'bcarrielr@unemi.edu.ec'
+EMAIL_HOST_PASSWORD = 'brignercr10'
+EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'

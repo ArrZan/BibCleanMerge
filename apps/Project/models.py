@@ -9,86 +9,120 @@ import bibtexparser as bparser
 
 import re
 
+from unidecode import unidecode
+
+from apps.Login.models import User
 from apps.Project.libs import PurgeData
+from main import settings
 
 
-# class Project(models.Model):
-#     id_project = models.IntegerField(primary_key=True)
-#     id_usuario = models.ForeignKey(User, on_delete=models.CASCADE)
-#     prj_name = models.CharField(max_length=50)
-#     prj_description = models.CharField(max_length=255)
-#     prj_n_articles = models.IntegerField()
-#     prj_date = models.DateField()
+class Project(models.Model):
+    id_usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    prj_name = models.CharField(max_length=50)
+    prj_description = models.CharField(max_length=255)
+    prj_date = models.DateField(auto_now_add=True)  # Permite agregar la fecha actual al registrar
+    prj_last_modified = models.DateField(auto_now=True)  # Permite agregar la fecha al modificar
+
+    def __str__(self):
+        return self.prj_name
+
+    def get_last_report(self):
+        reports = self.reports.values('rep_name_file_merged', 'rep_n_articles_files', 'id').last()
+
+        if reports:
+            reports['rep_name_file_merged'] = f'{settings.MEDIA_URL}/files/bib/{reports['rep_name_file_merged']}'
+        else:
+            reports['rep_name_file_merged'] = None
+
+        return reports
 
 
 class ProjectFiles(models.Model):
-    # id_project_files = models.AutoField(primary_key=True)
-    # id_project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    # pf_name_file = models.CharField(max_length=100)
-    # pf_p_articles = models.IntegerField()
-    # pf_p_conferences = models.IntegerField()
-    # pf_p_papers = models.IntegerField()
-    # pf_p_books = models.IntegerField()
-    # pf_p_others = models.IntegerField()
-    # pf_n_entries_file = models.IntegerField()
+    id_project_files = models.AutoField(primary_key=True)
+    id_project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    pf_name_file = models.CharField(max_length=100)
+    pf_p_articles = models.IntegerField()
+    pf_p_conferences = models.IntegerField()
+    pf_p_papers = models.IntegerField()
+    pf_p_books = models.IntegerField()
+    pf_p_others = models.IntegerField()
+    pf_n_entries_file = models.IntegerField()
 
-    # def __str__(self):
-    #     return self.pf_name_file
+    def __str__(self):
+        return self.pf_name_file
 
-    def clean_black_sheep(self, entries, content):
-        # Sacamos una lista completa de todos las entradas con regex
-        list_entry_id = re.findall(r'@\w+\{\s*(\S.+),', content)
 
-        # Hacemos una copia de lista extraída
-        list_not_ID = list_entry_id.copy()
+# class ProjectFilesEntries(models.Model):
+#     id_project_files_entries = models.AutoField(primary_key=True)
+#     id_project_files = models.ForeignKey(ProjectFiles, on_delete=models.CASCADE)
+#     pfe_title = models.CharField(max_length=100)
+#     pfe_authors = models.CharField(max_length=255)
+#     pfe_journal = models.CharField(max_length=255)
+#     pfe_volume = models.IntegerField()
+#     pfe_keywords = models.TextField()
+#     pfe_number = models.IntegerField()
+#     pfe_pages = models.IntegerField()
+#     pfe_year = models.IntegerField()
+#     pfe_doi = models.CharField(max_length=100)
+#
+#     def __str__(self):
+#         return self.pfe_title
+#
 
-        for entry in entries:
-            entry_id = entry.get('ID', '')
+class Report(models.Model):
+    id_project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='reports')
+    rep_p_articles = models.IntegerField()
+    rep_p_conferences = models.IntegerField()
+    rep_p_papers = models.IntegerField()
+    rep_p_books = models.IntegerField()
+    rep_p_others = models.IntegerField()
+    rep_n_articles_files = models.IntegerField()
+    rep_n_processed = models.IntegerField()
+    rep_n_duplicate = models.IntegerField()
+    rep_n_files = models.IntegerField()
+    rep_duration_seg = models.IntegerField()
+    rep_size_file = models.IntegerField()
+    rep_name_file_merged = models.CharField(max_length=100)
+    rep_date = models.DateField(auto_now_add=True)  # Permite agregar la fecha actual al registrar
 
-            # Removemos de la copia los valores existentes del entrie y dejamos los que tienen inconsistencias
-            if entry_id in list_entry_id:
-                list_not_ID.remove(entry_id)
+    def __str__(self):
+        return f"Report {self.id} for Project {self.id_project.prj_name}"
 
-        # Esto es para TESTING (BORRAR)
-        name_date = datetime.now().strftime("%Y%m%d%H%M%S")
-        from main import settings
-        filePath = os.path.join(settings.MEDIA_BIB, f'list_ovejas_negras_{name_date}.txt')
+    def get_formated_duration(self):
+        minu = int(self.rep_duration_seg // 60)
+        sec = int(self.rep_duration_seg % 60)
 
-        # Esto es para TESTING (BORRAR)
-        print("Cantidad de id's: ", len(list_entry_id))
-        print("Contador de objeas negras: ", len(list_not_ID))
-        print("Lista de obejas negras: \n", list_not_ID)
-        with open(filePath, 'w') as f:
-            for id_ in list_not_ID:
-                f.write(id_ + "\n")
+        return f"{minu:02}:{sec:02} seg"  # Tiempo formateado
 
-        return f"""Cantidad de id's: {len(list_entry_id)}\nConteo de los tipos: {len(entries)}\nContador de objeas negras: {len(list_not_ID)}\nLista de obejas negras: {list_not_ID}
-        """
+    def get_file_path(self):
+        if self.rep_name_file_merged:
+            return f'{settings.MEDIA_URL}/files/bib/{self.rep_name_file_merged}'
+        else:
+            return None
 
-    # def get_numbers_standard_types(self, entries):
-    #     # Creamos un diccionario con los standar type y un contador en 0
-    #     type_counts = {'article': 0,
-    #                    'book': 0,
-    #                    'conference': 0,
-    #                    'others': 0,
-    #                    }
-    #
-    #     # Iteramos los entries del parser
-    #     for entry in entries:
-    #         entry_type = entry.get('ENTRYTYPE', '').lower()
-    #
-    #         # Sacamos la cantidad por cada tipo de entry (books, article, conferences, etc)
-    #         if entry_type in type_counts:
-    #             type_counts[entry_type] += 1
-    #         else:
-    #             type_counts['others'] += 1
-    #
-    #     # Esto es para TESTING (BORRAR)
-    #     for entry_type, count in type_counts.items():
-    #         print(f'{entry_type}: {count}')
-    #
-    #     return type_counts
-    #
+    def get_size(self):
+        if self.rep_size_file:
+            size = self.rep_size_file / (1024 * 1024)
+            return f'{size:.2f} MB'  # Tamaño de archivo en MB
+        else:
+            return
+
+    def get_count_types(self):
+        data = {}
+
+        if self.rep_p_articles:
+            data['article'] = self.rep_p_articles
+
+        if self.rep_p_books:
+            data['book'] = self.rep_p_books
+
+        if self.rep_p_conferences:
+            data['conference'] = self.rep_p_conferences
+
+        if self.rep_p_others:
+            data['others'] = self.rep_p_others
+
+        return data
 
 
 class ProjectFile:
@@ -183,17 +217,22 @@ class ProjectFile:
             # Se controla lo que son el título y autor, se los convierte a minúscula
             # para evitar problemas en la comparación
             title = entry['title'].lower()
+            title = self.replace_slash(title)
             author = entry['author'].lower()
+            print(unidecode(author))
+            author = self.replace_slash(author)
 
             # Lo guardamos en una tupla para meterlo como clave en el diccionario
             clave = (title, author, entry['year'])
 
             # Si no está la clave, esta ingresa como única junto con el entry
             if clave not in Obj_PurgeData.entradas_unicas:
-                Obj_PurgeData.entradas_unicas[clave] = entry
+                # Obj_PurgeData.entradas_unicas[clave] = entry
+                Obj_PurgeData.entradas_unicas[clave] = 1
             else:
                 # Si es una clave repetida, se los manda a combinar
-                Obj_PurgeData.entradas_unicas[clave] = self.combinar_entradas(Obj_PurgeData.entradas_unicas[clave], entry)
+                # Obj_PurgeData.entradas_unicas[clave] = self.combinar_entradas(Obj_PurgeData.entradas_unicas[clave], entry)
+                Obj_PurgeData.entradas_unicas[clave] += 1
 
             Obj_PurgeData.contArt += 1
 
@@ -230,3 +269,63 @@ class ProjectFile:
             if keyword == ''.join([word[0] for word in expanded.split()]):
                 return expanded
         return keyword
+
+    @staticmethod
+    def replace_slash(string):
+        return string.replace('\n', ' ')
+
+
+    def clean_black_sheep(self, entries, content):
+        # Sacamos una lista completa de todos las entradas con regex
+        list_entry_id = re.findall(r'@\w+\{\s*(\S.+),', content)
+
+        # Hacemos una copia de lista extraída
+        list_not_ID = list_entry_id.copy()
+
+        for entry in entries:
+            entry_id = entry.get('ID', '')
+
+            # Removemos de la copia los valores existentes del entrie y dejamos los que tienen inconsistencias
+            if entry_id in list_entry_id:
+                list_not_ID.remove(entry_id)
+
+        # Esto es para TESTING (BORRAR)
+        name_date = datetime.now().strftime("%Y%m%d%H%M%S")
+        from main import settings
+        filePath = os.path.join(settings.MEDIA_BIB, f'list_ovejas_negras_{name_date}.txt')
+
+        # Esto es para TESTING (BORRAR)
+        print("Cantidad de id's: ", len(list_entry_id))
+        print("Contador de objeas negras: ", len(list_not_ID))
+        print("Lista de obejas negras: \n", list_not_ID)
+        with open(filePath, 'w') as f:
+            for id_ in list_not_ID:
+                f.write(id_ + "\n")
+
+        return f"""Cantidad de id's: {len(list_entry_id)}\nConteo de los tipos: {len(entries)}\nContador de objeas negras: {len(list_not_ID)}\nLista de obejas negras: {list_not_ID}
+        """
+
+    # def get_numbers_standard_types(self, entries):
+    #     # Creamos un diccionario con los standar type y un contador en 0
+    #     type_counts = {'article': 0,
+    #                    'book': 0,
+    #                    'conference': 0,
+    #                    'others': 0,
+    #                    }
+    #
+    #     # Iteramos los entries del parser
+    #     for entry in entries:
+    #         entry_type = entry.get('ENTRYTYPE', '').lower()
+    #
+    #         # Sacamos la cantidad por cada tipo de entry (books, article, conferences, etc)
+    #         if entry_type in type_counts:
+    #             type_counts[entry_type] += 1
+    #         else:
+    #             type_counts['others'] += 1
+    #
+    #     # Esto es para TESTING (BORRAR)
+    #     for entry_type, count in type_counts.items():
+    #         print(f'{entry_type}: {count}')
+    #
+    #     return type_counts
+    #
