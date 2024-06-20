@@ -50,8 +50,10 @@
                 </div>
 
                 <div class="row body scroll-st scroll-style">
-                    <!-- <h5 style="margin-top:5px;">Aún no tienes proyectos.</h5> -->
                     <div class="items">
+                        <!-- Un blur para cuando se active un menu-options -->
+                        <div class="blur-section-item"></div>
+                    
                         {% if object_list %}
                         {% for object in object_list %}
                         	<div class="item" data-project-id="{{ object.id }}">
@@ -121,7 +123,7 @@
                         {% else %}
                             <div class="non-image">
                                 <img src="{% static 'img/utils/non_file.svg' %}" alt="Imagen de que no existen archivos">
-                                <h5>No hay Proyectos creados, <a href="#">¿Deseas agregar un proyecto?</a></h5>
+                                <h5 style="text-align: center;">No hay Proyectos creados, <a href="#">¿Deseas agregar un proyecto?</a></h5>
                                 <a href="https://www.freepik.es/vector-gratis/agregar-ilustracion-concepto-archivos_5461692.htm#from_view=detail_alsolike">Imagen de storyset en Freepik</a>
                             </div>
                         {% endif %}

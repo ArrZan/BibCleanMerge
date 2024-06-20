@@ -2,14 +2,15 @@ import re
 import sys
 import time
 
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import redirect
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse, Http404
+from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
-from django.utils.decorators import method_decorator
-from django.views.generic import ListView, TemplateView, View, DetailView
+from django.views.generic import ListView, View, DetailView, DeleteView
+from django.contrib import messages
 
-from apps.Project.models import ProjectFiles, ProjectFile, Project, Report
+from apps.Login.Mixins import AccessProjectMixin
+from apps.Project.models import ProjectFile, Project, Report
 from main import settings
 
 # Importanción de librería para parsear los archivos bib
@@ -25,13 +26,12 @@ from apps.Project.libs import PurgeData
 """
 
 
-@method_decorator(login_required, name='dispatch')
-class ListProjectsView(ListView):
+class ListProjectsView(LoginRequiredMixin, ListView):
     template_name = 'Project/list_Projects.html'
     model = Project
 
     def get_queryset(self):
-        return Project.objects.filter(id_usuario=self.request.user)
+        return Project.objects.filter(id_usuario=self.request.user.id)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -39,14 +39,29 @@ class ListProjectsView(ListView):
         return context
 
 
+"""
+---------------------------------------------------------------------- Eliminación de un proyectos
+"""
+
+
+class DeleteProjectView(LoginRequiredMixin, AccessProjectMixin, View):
+    def post(self, request, project_id):
+        project = get_object_or_404(Project, id=project_id)
+
+        print(project)
+        # Eliminar el proyecto
+        # project.delete()
+        messages.success(request, "El proyecto ha sido impreso correctamente.")
+
+        # return redirect('list_projects')  # Redirige a la lista de proyectos después de eliminar
+
 
 """
----------------------------------------------------------------------- Lista de proyectos
+---------------------------------------------------------------------- Detalle de un reporte
 """
 
 
-@method_decorator(login_required, name='dispatch')
-class ReportDetailView(DetailView):
+class ReportDetailView(LoginRequiredMixin, AccessProjectMixin, DetailView):
     template_name = 'Project/detail_report.html'
     model = Report
 
@@ -55,13 +70,22 @@ class ReportDetailView(DetailView):
         context['title'] = f'Reporte de proceso'
         return context
 
+    def check_permissions(self, obj):
+        report = self.get_object()
+        # Preguntamos si tiene permismo ese usuario a ese reporte
+        # Si se desea controlar grupos para un proyecto, esto debe de cambiar
+        # Implicaría revisar si ese usuario es colaborador de ese proyecto
+        if not self.request.user.id == report.id_project.id_usuario.id:
+            return False
+        return True
+
 
 """
 ---------------------------------------------------------------------- Procesamiento rápido
 """
 
 
-class ProcesamientoView(View):
+class ProcesamientoView(LoginRequiredMixin, View):
 
     @staticmethod
     def post(request, *args, **kwargs):
@@ -226,19 +250,3 @@ class ProcesamientoView(View):
                                  'error_message': str(e)}, status=500)
 
 
-class ReportsTempView(TemplateView):
-    template_name = 'Project/detail_report.html'
-
-    # success_url = 'login'
-
-    # def dispatch(self, request, *args, **kwargs):
-    #     if request.user.is_authenticated:
-    #         return redirect(self.success_url)
-    #
-    #     return super().dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Reporte'
-        context['dataReport'] = self.request.session.get('dataSet', {})
-        return context

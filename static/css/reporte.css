@@ -196,4 +196,13 @@ svg {
     .scrollable-row {
         max-height: max-content;
     }
+
+    .box-metrics > p {
+        font-size: 14px;
+        width: 70%;
+    }
+
+    .box-metrics > i {
+        font-size: 14px;
+    }
 }

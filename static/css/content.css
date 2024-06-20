@@ -179,11 +179,34 @@ textarea,
     }
 
     .header-c .btn:last-child {
-            padding: 0 .5rem;
+        padding: 0 .5rem;
     }
 
     .header-c .btn .text-bt {
-        display: none;
+        position: absolute;
+        width: max-content;
+        background: var(--blue);
+        padding: 2px 8px;
+        border-radius: 4px;
+        right: 40px;
+        animation: slideLeft 5s ease forwards;
+    }
+
+    /*Desplazamiento a la izquierda para retroalimentar al usuario de los botones en pantallas de cell*/
+    @keyframes slideLeft {
+        0% {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        90% {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        100% {
+            opacity: 0;
+            transform: translateX(-100%);
+            display: none;
+        }
     }
 
     .body-c {

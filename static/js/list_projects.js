@@ -1,21 +1,81 @@
 const $d = document;
-// MOSTRAR DESCRIPCIÓN DEL PROYECTO -------------------------------------------------------------------------------------------------
+const blur_item = $d.querySelector('.blur-section-item');
+const items = $d.querySelector('.items');
 
+const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+// MOSTRAR DESCRIPCIÓN DEL PROYECTO -------------------------------------------------------------------------------------------------
 function showDescription(element) {
     let item = element.parentElement;
-    
+
     item.classList.toggle('show-display');
 }
 
 // MOSTRAR OPCIONES EN CELULAR ------------------------------------------------------------------------------------------------------
-
 function showOptions(element) {
-    let item = element.parentElement;
+    const menu_option = element.parentElement;
+    const item = menu_option.parentElement.parentElement.parentElement;
 
-    item.classList.toggle('toggle');
+    // Añadimos un foco al item seleccionado con resalted
+    item.classList.add('resalted');
+    blur_item.classList.add('resalted');
+    menu_option.style.zIndex = "2";
+
+    // Fijamos la posición de ese item en la pantalla
+    scrollToSection('smooth');
+
+    // Mostramos el menu de opciones
+    menu_option.classList.toggle('toggle');
+    items.style.scroll = 'hidden';
+
+
+    // Dejamos de hacer foco en el item seleccionado quitandole la clase resalted
+    blur_item.addEventListener('click', (e) => {
+        removeResalted(item, menu_option);
+        items.style.scroll = 'auto';
+    });
+
+    // Escuchamos el evento de resize para manejar cambios de orientación
+    window.addEventListener('resize', function () {
+        // Cada que se cambia, llamamos a la función para desplazarnos al item seleccionad
+        if (window.matchMedia("(orientation: portrait)").matches) {
+            // Orientación vertical
+            scrollToSection();
+        } else if (window.matchMedia("(orientation: landscape)").matches) {
+            // Orientación horizontal
+            scrollToSection();
+        }
+    });
+
+    // Función para desplazar la página a la item.resalted cuando desplace a horizontal
+    function scrollToSection(bhv='instant') {
+        const sectionToScroll = $d.querySelector('.item.resalted');
+
+        // Siempre que exista moverse hacia allá
+        if (sectionToScroll) {
+            sectionToScroll.scrollIntoView({ behavior: bhv });
+            items.style.scroll = 'auto';
+        }
+    }
+
+    function removeResalted() {
+    item.classList.remove('resalted');
+    blur_item.classList.remove('resalted');
+    menu_option.style.zIndex = "0";
+    menu_option.classList.remove('toggle');
 }
 
+}
 
+// Ocultar menú desplegable cuando se hace clic en otro lugar, si es que quitamos todos los efectos
+// $d.addEventListener('click', function(event) {
+//     let menus = $d.querySelectorAll('.menu-options');
+//     menus.forEach(function(menu) {
+//         if (!menu.contains(event.target)) {
+//             menu.classList.remove('toggle');
+//             menu.style.zIndex = "1";
+//         }
+//     });
+// });
 
 
 // CREAR UN PROYECTO -------------------------------------------------------------------------------------------------------
@@ -39,10 +99,8 @@ function createProject() {
 
 function showDeleteModal(button) {
     const projectId = button.getAttribute("data-project-id");
-    const projectName = $d.querySelector(`[data-project-id="${projectId}"] .title-pj`).textContent;
-
     // Damos el nombre del proyecto al modal-body
-    $d.getElementById("project-name").textContent = projectName;
+    $d.getElementById("project-name").textContent = $d.querySelector(`[data-project-id="${projectId}"] .title-pj`).textContent;
     // Así mismo le damos al data-project-id el id del button
     $d.getElementById('delete-project-id').dataset.projectId = projectId;
 }
@@ -51,17 +109,6 @@ function showDeleteModal(button) {
 function deleteProject(element) {
     const projectId = element.dataset.projectId;
     const buttonDelete = $d.querySelector('#delete-project .btn-close');
-
-
-
-
-
-
-    // AQUÍ MANDAREMOS EL FETCH PARA EL BACKEND Y ELIMINAR UN PROYECTO DE LA BASE DE DATOS, PARA LUEGO CON EL RESPONSE
-    // LO ELIMINAMOS VISUALMENTE DE ACÁ
-
-
-
 
 
 
@@ -254,21 +301,22 @@ $d.addEventListener("DOMContentLoaded", function () {
 
     // ENVIAR ARCHIVOS SELECCIONADOS AL BACKEND PARA PROCESAMIENTO RÁPIDO ----------------------------------------------------------------
 
+    // Función para activar el blur de carga
     function blur_active() {
         $d.querySelector('.blur-shadow').classList.add('shadow-loader');
         $d.querySelector('.modal').style.zIndex = 4;
         $d.querySelector('.modal-backdrop.show').style.zIndex = 2;
     }
 
+    // Función para desactivar el blur de carga
     function blur_inactive() {
         $d.querySelector('.blur-shadow').classList.remove('shadow-loader');
     }
 
+    // Botón para enviar archivos al backend a procesar
     btnSendFiles.addEventListener('click', e => {
 
         if (Object.keys(files_upload).length > 0) {
-
-            let csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
             let url_view = "/project/fast_process/";
 
             let formData = new FormData();

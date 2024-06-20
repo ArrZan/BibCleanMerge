@@ -1,10 +1,11 @@
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, PasswordResetView
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.views.generic import CreateView
 
+from apps.Login.Mixins import ReturnHomeMixin
 from apps.Login.forms import CustomUserCreationForm
 
 """
@@ -12,7 +13,16 @@ from apps.Login.forms import CustomUserCreationForm
 """
 
 
-class RegisterUserView(CreateView):
+class LoginUserView(ReturnHomeMixin, LoginView):
+    extra_context = {'title': 'BibCleanMerge - Inicio de sesión'}
+
+
+"""
+---------------------------------------------------------------------- Registrar usuario
+"""
+
+
+class RegisterUserView(ReturnHomeMixin, CreateView):
     template_name = "registration/register.html"
     form_class = CustomUserCreationForm
     success_url = reverse_lazy('list_projects')
@@ -31,8 +41,6 @@ class RegisterUserView(CreateView):
             login(self.request, user)
         return response
 
-from django.contrib.auth.views import PasswordResetView
-from django.urls import reverse_lazy
 
 class CustomPasswordResetView(PasswordResetView):
     email_template_name = 'registration/password_reset_email.html'

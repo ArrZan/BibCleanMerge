@@ -1,11 +1,15 @@
 from django.urls import path
-from .views import ListProjectsView, ProcesamientoView, ReportsTempView, ReportDetailView
+from .views import ListProjectsView, ProcesamientoView, ReportDetailView, DeleteProjectView
 
 
 urlpatterns = [
-    # modulos/inicio
+    # Proyecto
     path('list/', ListProjectsView.as_view(), name='list_projects'),
+    path('projects/<int:project_id>/delete/', DeleteProjectView.as_view(), name='delete_project'),
+
+    # Procesamiento rápido
     path('fast_process/', ProcesamientoView.as_view(), name='fast_process'),
-    path('report/', ReportsTempView.as_view(), name='report'),
     path('report/<int:pk>/', ReportDetailView.as_view(), name='report_detail'),
+
+
 ]
