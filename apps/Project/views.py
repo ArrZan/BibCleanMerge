@@ -5,8 +5,8 @@ import time
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
-from django.urls import reverse
-from django.views.generic import ListView, View, DetailView, DeleteView
+from django.urls import reverse, reverse_lazy
+from django.views.generic import ListView, View, DetailView, DeleteView, UpdateView
 from django.contrib import messages
 
 from apps.Login.Mixins import AccessProjectMixin
@@ -31,6 +31,25 @@ class ListProjectsView(LoginRequiredMixin, ListView):
     model = Project
 
     def get_queryset(self):
+        return Project.objects.filter(id_usuario=self.request.user.id).order_by('-prj_date')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Proyectos'
+        return context
+
+
+"""
+---------------------------------------------------------------------- Creación de un proyecto
+"""
+
+
+class CreateProjectView(LoginRequiredMixin, ListView):
+    template_name = 'Project/list_Projects.html'
+    model = Project
+    success_url = reverse_lazy('Project')
+
+    def get_queryset(self):
         return Project.objects.filter(id_usuario=self.request.user.id)
 
     def get_context_data(self, **kwargs):
@@ -44,16 +63,39 @@ class ListProjectsView(LoginRequiredMixin, ListView):
 """
 
 
-class DeleteProjectView(LoginRequiredMixin, AccessProjectMixin, View):
-    def post(self, request, project_id):
-        project = get_object_or_404(Project, id=project_id)
+class DeleteProjectView(LoginRequiredMixin, AccessProjectMixin, DeleteView):
+    model = Project
 
-        print(project)
-        # Eliminar el proyecto
-        # project.delete()
-        messages.success(request, "El proyecto ha sido impreso correctamente.")
+    def form_valid(self, form):
+        try:
+            # Obtenemos el objeto a eliminar
+            project = self.get_object()
 
-        # return redirect('list_projects')  # Redirige a la lista de proyectos después de eliminar
+            # Eliminamos el objeto
+            project.delete()
+
+            # Devolvemos una respuesta JSON indicando éxito
+            return JsonResponse({'message': 'Proyecto eliminado.'})
+        except Project.DoesNotExist:
+            return JsonResponse({'error': 'Error: Proyecto no encontrado.'}, status=404)
+
+
+"""
+---------------------------------------------------------------------- Autoguardado de un proyecto
+"""
+
+
+class AutoSaveProjectView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        project_id = kwargs['project_id']  # Obtenemos el id del proyecto del parámetro kwargs de la url
+        try:
+            project = Project.objects.get(id=project_id)
+            project.prj_autosave = True  # Actualiza el campo autoguardado a True
+            project.save()  # Guardamos
+            return JsonResponse({'message': 'Proyecto guardado.'})
+        except Project.DoesNotExist:
+            return JsonResponse({'error': 'Proyecto no encontrado.'}, status=404)
+
 
 
 """
@@ -203,7 +245,7 @@ class ProcesamientoView(LoginRequiredMixin, View):
                 new_project = Project.objects.create(
                     id_usuario=request.user,
                     prj_name='Proyecto',
-                    prj_description='Descripción predeterminada del proyecto',
+                    prj_description='Sin descripción.',
                 )
 
                 # Crear el reporte asociado a este proyecto

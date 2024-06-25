@@ -83,7 +83,6 @@
     box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.55);
 }
 
-
 .ct-body .item > .col1 {
     position: relative;
     overflow: hidden;
@@ -187,6 +186,24 @@
     display: block;
 }
 
+
+/*Item de auoguardado -------------------------------------------*/
+
+.ct-body .item-False > .col1 {
+    opacity: .75;
+}
+
+.ct-body .item-False:hover .eye-float {
+    display: none;
+}
+
+.ct-body .item-False .col2 .btn-checksave {
+    font-size: 30px !important;
+}
+
+
+
+
 /* Opciones del item ------------------------------------------ */
 
 .ct-body .dropdown-option {
@@ -277,6 +294,7 @@
 .ct-body .item .col2 .btn-bar {
     background-color: var(--blue);
 }
+.ct-body .item .col2 .btn-checksave,
 .ct-body .item .col2 .btn-download {
     background-color: var(--green);
 }
@@ -288,11 +306,11 @@
 
 .ct-body .item .col2 .btn-bar:hover {
     background-color: var(--blue-dark);
-    }
-    
+}
+.ct-body .item .col2 .btn-checksave:hover,
 .ct-body .item .col2 .btn-download:hover {
     background-color: var(--green-dark);
-    }
+}
 
 .ct-body .item .col2 .btn-trash:hover {
     background-color: var(--red-dark);
@@ -307,6 +325,7 @@
     color: var(--blue-dark);
 }
 
+.ct-body .item-False .col2 .btn-checksave:active,
 .ct-body .item .col2 .btn-download:active {
     color: var(--green-dark);
 }
@@ -341,6 +360,10 @@
     z-index: 2;
 }
 
+.n-inactive {
+    display: none !important;
+}
+
 .non-image {
     display: flex;
     flex-direction: column;
@@ -350,7 +373,7 @@
 }
 
 .non-image img {
-    width: 35%;
+    width: 31%;
 }
 
 
@@ -558,8 +581,18 @@
 }
 
 /* ADVERTENCIA PARA EL MODAL ------------------------------------------- */
+#bodyAlertPlaceholder {
+    position: fixed;
+    bottom: 18px;
+    right: 38px;
+    z-index: 5;
+    transition: all .3s;
+}
 
-#liveAlertPlaceholder {
+
+
+/* ADVERTENCIA PARA EL MODAL ------------------------------------------- */
+#modalAlertPlaceholder {
     position: fixed;
     bottom: -6px;
     right: 9px;
@@ -626,6 +659,73 @@
 }
 
 
+
+
+
+/*UTILS ----------------------------------------------------------------------------------------------------*/
+
+.item .options .btn-checksave {
+    display: none !important;
+}
+
+.item-False .options > .dropdown-option,
+.item-False .options a.btn-download {
+    display: none !important;
+}
+
+.item-False .options .btn-checksave {
+    display: flex !important;
+}
+
+.option-info {
+    position: absolute;
+    top: 18px;
+    right: 90px;
+}
+
+.info-modal-autosave {
+    font-size: 18px;
+    border: 1px dashed var(--blue-dark);
+    border-radius: 50%;
+    padding: 10px !important;
+    height: 14px !important;
+    width: 14px !important;
+}
+
+.info-autosave p:last-child {
+    display: none;
+}
+
+.info-modal-autosave i {
+    color: var(--blue-dark);
+}
+
+.info-modal-autosave:hover {
+    background: var(--blue-dark);
+}
+
+.info-modal-autosave:hover i {
+    color: white;
+}
+
+.info-autosave,
+.info-guide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.info-guide img:last-child {
+    display: none;
+}
+
+.info-autosave {
+    flex-direction: column;
+}
+
+.info-autosave img {
+    width: 80%;
+}
 
 
 
@@ -844,6 +944,35 @@
         background: none;
         height: 100%;
         border: 0;
+    }
+
+    .option-info {
+        top: 11px !important;
+        height: 38px !important;
+        right: 46px !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 39px !important;
+        box-shadow: none !important;
+    }
+
+    .info-modal-autosave {
+        height: 100% !important;
+        padding: 14px 10px !important;
+    }
+
+    .info-autosave p,
+    .info-guide img:first-child {
+        display: none;
+    }
+
+    .info-autosave p:last-child,
+    .info-guide img:last-child {
+        display: block;
+    }
+
+    .ct-body .item-False .col2 .btn-checksave {
+        font-size: 18px !important;
     }
 
     .ct-body .dropdown-option {

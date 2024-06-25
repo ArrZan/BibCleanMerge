@@ -2,7 +2,8 @@ const $d = document;
 const blur_item = $d.querySelector('.blur-section-item');
 const items = $d.querySelector('.items');
 
-const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+const csrf = $d.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
 // MOSTRAR DESCRIPCIÓN DEL PROYECTO -------------------------------------------------------------------------------------------------
 function showDescription(element) {
     let item = element.parentElement;
@@ -31,7 +32,6 @@ function showOptions(element) {
     // Dejamos de hacer foco en el item seleccionado quitandole la clase resalted
     blur_item.addEventListener('click', (e) => {
         removeResalted(item, menu_option);
-        items.style.scroll = 'auto';
     });
 
     // Escuchamos el evento de resize para manejar cambios de orientación
@@ -57,13 +57,15 @@ function showOptions(element) {
         }
     }
 
-    function removeResalted() {
+}
+
+
+function removeResalted(item, menu_option) {
     item.classList.remove('resalted');
     blur_item.classList.remove('resalted');
     menu_option.style.zIndex = "0";
     menu_option.classList.remove('toggle');
-}
-
+    items.style.scroll = 'auto';
 }
 
 // Ocultar menú desplegable cuando se hace clic en otro lugar, si es que quitamos todos los efectos
@@ -85,7 +87,7 @@ function createProject() {
 
     const titleProject = modalCreate.querySelector('#titleProject');
     const textProject = modalCreate.querySelector('#textProject');
-    
+
 
     // FALTA VALIDAR LOS CAMPOS
     console.log(titleProject.value);
@@ -99,28 +101,86 @@ function createProject() {
 
 function showDeleteModal(button) {
     const projectId = button.getAttribute("data-project-id");
+    const projectUrl = button.getAttribute("data-project-url");
     // Damos el nombre del proyecto al modal-body
     $d.getElementById("project-name").textContent = $d.querySelector(`[data-project-id="${projectId}"] .title-pj`).textContent;
+
     // Así mismo le damos al data-project-id el id del button
     $d.getElementById('delete-project-id').dataset.projectId = projectId;
+    $d.getElementById('delete-project-id').dataset.projectUrl = projectUrl;
 }
+
 
 // Función para eliminar el proyecto
 function deleteProject(element) {
     const projectId = element.dataset.projectId;
     const buttonDelete = $d.querySelector('#delete-project .btn-close');
+    const url_view = element.dataset.projectUrl;
+
+    // Mandamos a procesar
+    fetch(url_view,{
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrf,
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        const menu_option = buttonDelete.parentElement.parentElement;
+        const item  = menu_option.parentElement.parentElement.parentElement;
+
+        // Removemos el item seleccionado
+        $d.querySelector(`[data-project-id="${projectId}"]`).remove();
+
+        $d.getElementById("project-name").textContent = '';
+        // Así mismo le damos al data-project-id el id del button
+        $d.getElementById('delete-project-id').dataset.projectId = '';
+
+        // Salimos del modal
+        buttonDelete.click();
+
+        appendAlert(data.message, "success", 'bodyAlertPlaceholder');
+
+
+        removeResalted(item, menu_option);
+        verificateItems();
+    })
+    .catch(error => {
+        console.log('Error: ', error);
+    })
+
+}
 
 
 
-    // Removemos el item seleccionado
-    $d.querySelector(`[data-project-id="${projectId}"]`).remove();
+// SALVAGUARDAR UN PROYECTO -------------------------------------------------------------------------------------------------
+function saveProject(element) {
+    const url_view = element.dataset.projectUrl;
 
-    $d.getElementById("project-name").textContent = '';
-    // Así mismo le damos al data-project-id el id del button
-    $d.getElementById('delete-project-id').dataset.projectId = '';
+     // Mandamos a procesar
+    fetch(url_view,{
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrf,
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            const item = document.querySelector(`[data-project-id="${element.dataset.projectId}"]`);
 
-    // Salimos del modal
-    buttonDelete.click();
+            item.querySelector('.option-info').remove();
+            item.classList.remove('item-False');
+
+            appendAlert(data.message, "success", 'bodyAlertPlaceholder');
+        } else if (data.error) {
+
+            console.log(data.error)
+            appendAlert(data.error, "danger", 'bodyAlertPlaceholder');
+        }
+    })
 
 }
 
@@ -143,6 +203,15 @@ $d.addEventListener("DOMContentLoaded", function () {
     let files_upload = {};
     let contDict = 0;
     let currentTotalSize = 0;
+
+    // Si existe algún archivo autoguardado se abrirá esto
+    if ($d.querySelector('.info-modal-autosave')) {
+        $d.querySelector('.info-modal-autosave').click();
+    }
+
+    // Si existe algún proyecto se ocultará la imagen
+    verificateItems();
+
 
     // FUNCIÓN PARA AGREGAR ARCHIVOS -------------------------------------------------------------------------------------------
     function addFiles(arrayFile) {
@@ -220,7 +289,7 @@ $d.addEventListener("DOMContentLoaded", function () {
 
     // Actualizamos el peso de todos los archivos subidos
     function updateTotalSizeElement() {
-    const infoFiles = document.querySelector(".info-files");
+    const infoFiles = $d.querySelector(".info-files");
     if (infoFiles) {
         infoFiles.querySelector('strong').textContent = `${currentTotalSize.toFixed(2)} MB`;
     }}
@@ -279,39 +348,7 @@ $d.addEventListener("DOMContentLoaded", function () {
 
     });
 
-
-
-    // MOSTRADOR DE ALERTAS DE BOOSTRAP ---------------------------------------------------------------
-
-    const alertPlaceholder = $d.getElementById('liveAlertPlaceholder')
-    const appendAlert = (message, type) => {
-        const wrapper = $d.createElement('div');
-        wrapper.innerHTML = [
-        `<div class="alert alert-${type} alert-dismissible" role="alert">`,
-        `   <div>${message}</div>`,
-        '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
-        '</div>'
-        ].join('');
-
-        alertPlaceholder.append(wrapper);
-    };
-
-
-
-
     // ENVIAR ARCHIVOS SELECCIONADOS AL BACKEND PARA PROCESAMIENTO RÁPIDO ----------------------------------------------------------------
-
-    // Función para activar el blur de carga
-    function blur_active() {
-        $d.querySelector('.blur-shadow').classList.add('shadow-loader');
-        $d.querySelector('.modal').style.zIndex = 4;
-        $d.querySelector('.modal-backdrop.show').style.zIndex = 2;
-    }
-
-    // Función para desactivar el blur de carga
-    function blur_inactive() {
-        $d.querySelector('.blur-shadow').classList.remove('shadow-loader');
-    }
 
     // Botón para enviar archivos al backend a procesar
     btnSendFiles.addEventListener('click', e => {
@@ -368,3 +405,40 @@ $d.addEventListener("DOMContentLoaded", function () {
 
 
 });
+
+// MOSTRADOR DE ALERTAS DE BOOSTRAP ---------------------------------------------------------------
+
+const appendAlert = (message, type, idAlertDiv='modalAlertPlaceholder') => {
+    const alertPlaceholder = $d.getElementById(idAlertDiv);
+    const wrapper = $d.createElement('div');
+    wrapper.innerHTML = [
+    `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+    `   <div>${message}</div>`,
+    '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+    '</div>'
+    ].join('');
+
+    alertPlaceholder.append(wrapper);
+};
+
+
+// Función para verificar si hay items y presentar una imagne
+function verificateItems() {
+    if ($d.querySelector('.ct-body .item')) {
+        $d.querySelector('.non-image').classList.add('n-inactive');
+    } else {
+        $d.querySelector('.non-image').classList.remove('n-inactive');
+    }
+}
+
+// Función para activar el blur de carga
+function blur_active() {
+    $d.querySelector('.blur-shadow').classList.add('shadow-loader');
+    $d.querySelector('.modal').style.zIndex = 4;
+    $d.querySelector('.modal-backdrop.show').style.zIndex = 2;
+}
+
+// Función para desactivar el blur de carga
+function blur_inactive() {
+    $d.querySelector('.blur-shadow').classList.remove('shadow-loader');
+}

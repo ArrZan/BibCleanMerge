@@ -28,7 +28,7 @@
                         Procesa ya
                     </div>
                 </button>
-                <button disabled class="btn btn_warning col-auto fw-bold" data-bs-toggle="modal" data-bs-target="#add_project">
+                <button class="btn btn_warning col-auto fw-bold" data-bs-toggle="modal" data-bs-target="#add_project">
                     <img src="{% static 'img/utils/plus.svg' %}" alt="+">
                     <div class="text-bt">
                         Nuevo Proyecto
@@ -51,21 +51,27 @@
 
                 <div class="row body scroll-st scroll-style">
                     <div class="items">
+                    {% csrf_token %}
                         <!-- Un blur para cuando se active un menu-options -->
                         <div class="blur-section-item"></div>
                     
-                        {% if object_list %}
                         {% for object in object_list %}
-                        	<div class="item" data-project-id="{{ object.id }}">
+                        	<div class="item {% if object.prj_autosave == False %}item-{{ object.prj_autosave }}{% endif %}" data-project-id="{{ object.id }}">
 
                                 <a class="col1" href="#">
                                     <span class="title-pj">{{ object.prj_name }}</span>
                                 </a>
 
                                 <div class="col2">
+                                    {% if object.prj_autosave == False %}
+                                        <div class="options option-info">
+                                             <button class="btn info-modal-autosave" data-bs-toggle="modal" data-bs-target="#modal-autosave">
+                                                <i class="bi bi-exclamation-lg"></i>
+                                                <span class="text">Info</span>
+                                            </button>
+                                        </div>
+                                    {% endif %}
                                     <div class="row1">
-
-
                                         <div class="text col1">
                                             <div class="num-pj">{{ object.get_last_report.rep_n_articles_files }}</div>
                                         </div>
@@ -79,6 +85,7 @@
                                                 <i class="bi bi-three-dots-vertical"></i>
                                             </button>
 
+                                                
                                             <div class="options">
                                                 <div class="dropdown-option">
                                                     <a class="btn btn-bar btn-down" href="">
@@ -90,14 +97,23 @@
                                                         <span class="text">Ver último reporte</span>
                                                     </a>
                                                 </div>
+
                                                 <a class="btn btn-download" href="{{ object.get_last_report.rep_name_file_merged }}">
                                                     <i class="bi bi-file-earmark-arrow-down-fill"></i>
                                                     <span class="text">Descargar merged</span>
                                                 </a>
-                                                <button class="btn btn-trash" data-bs-toggle="modal" data-bs-target="#delete-project" data-project-id="{{ object.id }}" onclick="showDeleteModal(this)">
+                                                
+                                                <!-- Si el item no está guardado (False) se presenta un visto -->
+                                                <button class="btn btn-checksave" data-project-id="{{ object.id }}" data-project-url="{% url 'autosave_project' object.id %}" onclick="saveProject(this)">
+                                                    <i class="bi bi-check"></i>
+                                                    <span class="text">Guardar</span>
+                                                </button>
+
+                                                <button class="btn btn-trash" data-bs-toggle="modal" data-bs-target="#delete-project" data-project-id="{{ object.id }}" data-project-url="{% url 'delete_project' object.id %}" onclick="showDeleteModal(this)">
                                                     <i class="bi bi-trash-fill"></i>
                                                     <span class="text">Eliminar</span>
                                                 </button>
+
                                             </div>
                                         </div>
 
@@ -120,15 +136,12 @@
 
                             </div>
                         {% endfor %}
-                        {% else %}
-                            <div class="non-image">
-                                <img src="{% static 'img/utils/non_file.svg' %}" alt="Imagen de que no existen archivos">
-                                <h5 style="text-align: center;">No hay Proyectos creados, <a href="#">¿Deseas agregar un proyecto?</a></h5>
-                                <a href="https://www.freepik.es/vector-gratis/agregar-ilustracion-concepto-archivos_5461692.htm#from_view=detail_alsolike">Imagen de storyset en Freepik</a>
-                            </div>
-                        {% endif %}
 
-
+                        <div class="non-image">
+                            <img src="{% static 'img/utils/non_file.svg' %}" alt="Imagen de que no existen archivos">
+                            <h5 style="text-align: center;">No hay Proyectos creados, <a href="" data-bs-toggle="modal" data-bs-target="#add_project">¿Deseas agregar un proyecto?</a></h5>
+                            <a style="font-size: 13px;" href="https://www.freepik.es/vector-gratis/agregar-ilustracion-concepto-archivos_5461692.htm">Imagen de freepik</a>
+                        </div>
 
                     </div>
                 </div>
@@ -136,6 +149,7 @@
             </div>
 
         </div>
+    <div id="bodyAlertPlaceholder"></div>
     </div>
 {% endblock %}
 
@@ -165,8 +179,7 @@
                     <div class="container text-center">
                         <form class="custom-form" method="post" id="form-files" action="." enctype="multipart/form-data">
                             <div id="file-list" class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6">
-                                    {% csrf_token %}
-                                    
+
                                     <div class="col add-file">
                                         <div id="add-file-button" class="square">
     
@@ -197,7 +210,7 @@
 
             </div>
         </div>
-        <div id="liveAlertPlaceholder"></div>
+        <div id="modalAlertPlaceholder"></div>
 
     </div>
 
@@ -224,12 +237,12 @@
                 <div class="col col-11">
                     <div class="form-floating mt-3 mb-3">
                         <input type="text" class="form-control" id="titleProject" minlength="10" maxlength="50" placeholder="Nombre del proyecto">
-                        <label for="floatingInput">Nombre del proyecto</label>
+                        <label for="titleProject">Nombre del proyecto</label>
                     </div>
 
                     <div class="form-floating mt-3 mb-3">
                         <textarea class="form-control" placeholder="Dale una descripción a tu proyect" id="textProject" style="height: 100px"></textarea>
-                        <label for="floatingTextarea">Descripción de proyecto</label>
+                        <label for="textProject">Descripción de proyecto</label>
                     </div>
                 </div>
 
@@ -269,11 +282,59 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="delete-project-id" data-project-id="" onclick="deleteProject(this)">Eliminar</button>
+                {% csrf_token %}
+                <button type="button" class="btn btn-primary" id="delete-project-id" data-project-url="" data-project-id="" onclick="deleteProject(this)">Eliminar</button>
             </div>
         </div>
         </div>
     </div>
+
+
+    <!-- Modal PARA PROYECTOS AUTOGUARDADOS --------------------------------------------------------->
+
+    <div class="modal fade" id="modal-autosave" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <i class="bi bi-archive"></i>
+                <h1 class="modal-title fs-4" id="exampleModalLabel">Proyectos autoguardados</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <div class="info-autosave">
+                    <img src="{% static 'img/utils/autosave.svg' %}" alt="Persona pensando">
+                    <a href="https://www.freepik.es/vector-gratis/dibujado-mano-ilustracion-datos_49639856.htm">Imagen de freepik</a>
+
+                    <p>Tienes proyectos no guardados. Los puedes guardar dando click en el <strong>botón verde
+                        con el visto</strong> o si deseas eliminarlo: darle click en el <strong>botón rojo con un tachito de basura</strong>:</p>
+
+                    <p>Tienes proyectos no guardados. Para guardarlos, solo escoge de las opciones
+                        si "<strong>guardar</strong>" o si deseas eliminarlo: presionar sobre "<strong>Eliminar</strong>".</p>
+                </div>
+
+
+
+                <div class="info-guide">
+                    <img src="{% static 'img/utils/autosave_guide.png' %}" alt="Guía de botones, verde para guardar y rojo para eliminar.">
+                    <img src="{% static 'img/utils/autosave_guide_cell.png' %}" alt="Guía de botones, verde para guardar y rojo para eliminar.">
+                </div>
+
+
+            </div>
+
+            <div class="modal-footer">
+{#                <button type="button" class="btn btn-primary">No volver a mostrar</button>#}
+                <button type="button" data-bs-dismiss="modal" class="btn btn-primary">Aceptar</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
 
     <div class="blur-shadow">
         <span class="loader"></span>

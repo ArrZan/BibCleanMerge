@@ -22,6 +22,7 @@ class Project(models.Model):
     prj_description = models.CharField(max_length=255)
     prj_date = models.DateField(auto_now_add=True)  # Permite agregar la fecha actual al registrar
     prj_last_modified = models.DateField(auto_now=True)  # Permite agregar la fecha al modificar
+    prj_autosave = models.BooleanField(default=False)  # Nos permite saber si el proyecto se autoguardó
 
     def __str__(self):
         return self.prj_name
