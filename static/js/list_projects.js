@@ -83,15 +83,7 @@ function removeResalted(item, menu_option) {
 // CREAR UN PROYECTO -------------------------------------------------------------------------------------------------------
 
 function createProject() {
-    const modalCreate = $d.getElementById('add_project');
-
-    const titleProject = modalCreate.querySelector('#titleProject');
-    const textProject = modalCreate.querySelector('#textProject');
-
-
-    // FALTA VALIDAR LOS CAMPOS
-    console.log(titleProject.value);
-    console.log(textProject.value);
+    document.getElementById('submit-btn').click();
 }
 
 
@@ -354,7 +346,7 @@ $d.addEventListener("DOMContentLoaded", function () {
     btnSendFiles.addEventListener('click', e => {
 
         if (Object.keys(files_upload).length > 0) {
-            let url_view = "/project/fast_process/";
+            let url_view = btnSendFiles.dataset.projectUrl;
 
             let formData = new FormData();
 

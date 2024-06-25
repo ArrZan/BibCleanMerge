@@ -236,6 +236,13 @@
     width: 25px !important;
 }
 
+.btn-a-disabled {
+    cursor: default;
+    pointer-events: none;
+    background: var(--gray-middle) !important;
+
+}
+
 .ct-body .dropdown-option .btn-down .bi-caret-down-fill {
     font-size: 8px;
     color: var(--blue-dark);

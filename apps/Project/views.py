@@ -6,10 +6,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
-from django.views.generic import ListView, View, DetailView, DeleteView, UpdateView
+from django.views.generic import ListView, View, DetailView, DeleteView, UpdateView, CreateView
 from django.contrib import messages
 
 from apps.Login.Mixins import AccessProjectMixin
+from apps.Project.forms import ProjectForm
 from apps.Project.models import ProjectFile, Project, Report
 from main import settings
 
@@ -44,17 +45,36 @@ class ListProjectsView(LoginRequiredMixin, ListView):
 """
 
 
-class CreateProjectView(LoginRequiredMixin, ListView):
+class CreateProjectView(LoginRequiredMixin, CreateView):
     template_name = 'Project/list_Projects.html'
     model = Project
-    success_url = reverse_lazy('Project')
+    form_class = ProjectForm
 
-    def get_queryset(self):
-        return Project.objects.filter(id_usuario=self.request.user.id)
+    def form_valid(self, form):
+        form.instance.id_usuario = self.request.user  # Asignamos el usuario actual al proyecto
+        form.instance.prj_autosave = True  # Esto es para indicar que el usuario si guardó el proyecto
+
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        # Redirigimos a la vista de gestión/edición del proyecto recién creado
+        return reverse_lazy('edit_project', kwargs={'pk': self.object.pk})
+
+
+"""
+---------------------------------------------------------------------- Gestión o edición de un proyecto
+"""
+
+
+class EditProjectView(LoginRequiredMixin, DetailView):
+    template_name = 'Project/edit_project.html'
+    model = Project
+    fields = ['prj_name', 'prj_description']  # Campos del modelo que incluimos en el formulario
+    success_url = reverse_lazy('edit_project')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Proyectos'
+        context['title'] = 'Gestión de Proyecto'
         return context
 
 
@@ -95,7 +115,6 @@ class AutoSaveProjectView(LoginRequiredMixin, View):
             return JsonResponse({'message': 'Proyecto guardado.'})
         except Project.DoesNotExist:
             return JsonResponse({'error': 'Proyecto no encontrado.'}, status=404)
-
 
 
 """

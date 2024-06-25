@@ -1,10 +1,13 @@
 from django.urls import path
-from .views import ListProjectsView, ProcesamientoView, ReportDetailView, DeleteProjectView, AutoSaveProjectView
+from .views import (ListProjectsView, ProcesamientoView, CreateProjectView, EditProjectView,
+                    ReportDetailView, DeleteProjectView, AutoSaveProjectView)
 
 
 urlpatterns = [
     # Proyecto
     path('list/', ListProjectsView.as_view(), name='list_projects'),
+    path('create/', CreateProjectView.as_view(), name='create_project'),
+    path('edit_project/<int:pk>/', EditProjectView.as_view(), name='edit_project'),
     path('delete/<int:pk>/', DeleteProjectView.as_view(), name='delete_project'),
     path('autosave/<int:project_id>/', AutoSaveProjectView.as_view(), name='autosave_project'),
 

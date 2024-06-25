@@ -1,0 +1,203 @@
+{% extends 'Project/base_project.html' %}
+{% load static %}
+
+
+{% block cssCustoms2 %}
+    <link rel="stylesheet" href="{% static "css/gestion_project.css" %}">
+    <link rel="stylesheet" href="{% static "css/loader.css" %}">
+{% endblock %}
+
+
+<!-- contenido de la pagina -->
+{% block content %}
+    <div class="header-c">
+        <div class="row">
+            <div class="col-md he-title">
+                <h2>{{ object.prj_name }}</h2>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md">
+                <p class="info_title">Gestión de la información del proyecto.</p>
+            </div>
+            <div class="col d-flex justify-content-end align-items-center btn-float">
+                <button class="btn btn_primary me-2 col-auto fw-bold"
+                    onclick="document.getElementById('fileInput').click()">
+                    <img src="/img/icon/add.png" alt="+">
+                    <div class="text-bt">
+                        Añadir Archivo
+                    </div>
+                    <input id="fileInput" type="file" accept=".bib" hidden multiple />
+                </button>
+                <a class="btn btn_warning col-auto fw-bold" href="reporte.html">
+                    <img src="/img/icon/save.png" alt="save">
+                    <div class="text-bt">
+                        Procesar
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido de la pagina -->
+    <div class="body-c">
+        <div class="container_content d-flex flex-column flex-md-row">
+            <div class="col-12 col-md-3 container_files border-2 container_files">
+                <B>Proyecto ABC</B>
+                <ul id="fileList" class="list-group p-2">
+                    <li class="list-item d-flex justify-content-between m-2 active_list">
+                        <h5 class="m-2">File 1</h5>
+                        <button class="btn btn_primary" data-bs-toggle="modal"
+                            data-bs-target="#eliminar_archivo">x</button>
+                    </li>
+                </ul>
+                <select class="form-select dropdown oculto">
+                    <option value="File 1">File 1</option>
+                    <option value="File 2">File 2</option>
+                    <option value="File 3">File 3</option>
+                    <option value="File 4">File 4</option>
+                    <option value="File 5">File 5</option>
+                    <option value="File 6" selected>File 6</option>
+                    <option value="File 7">File 7</option>
+                </select>
+            </div>
+            <div class="col table_container">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Autores</th>
+                            <th scope="col">Descripción</th>
+                            <th scope="col">Keys</th>
+                            <th scope="col">...</th>
+                            <th scope="col">...</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        <!-- agregar nuevo proyecto -->
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+{#        <div class="content-project">#}
+{#            <div class="ct-body">#}
+{#                #}
+{#            </div>#}
+{#        </div>#}
+    </div>
+
+{% endblock %}
+
+{% block modals %}
+	<!-- Modal para verificar la eliminación del archivo -->
+        <div class="modal fade" id="eliminar_archivo" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-dark">
+                        <h4 class="modal-title w-100 text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor"
+                                class="bi bi-exclamation-triangle-fill" viewBox="0 0 16 16">
+                                <path
+                                    d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2" />
+                            </svg>
+                            Seguro que deseas eliminar el archivo?
+                        </h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body bg-light text-dark pe-5 ps-5">
+                        <div id="passwordHelpBlock" class="form-text">
+                            Esta acción eliminará el archivo <strong>FAFAFAF.bib</strong> y todos los artículos
+                            relacionados.
+                            Esta operación no se puede deshacer.
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light d-flex justify-content-center">
+                        <button type="button" class="btn btn-secondary col-3" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-danger col-3">Confirmar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+
+
+{% block js %}
+    <script src="{% static "js/menu.js" %}"></script>
+    <script src="{% static "js/gestion_proyecto.js" %}"></script>
+{% endblock js %}

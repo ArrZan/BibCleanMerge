@@ -28,12 +28,18 @@ class Project(models.Model):
         return self.prj_name
 
     def get_last_report(self):
-        reports = self.reports.values('rep_name_file_merged', 'rep_n_articles_files', 'id').last()
 
-        if reports:
+        if self.reports.values():
+            reports = self.reports.values('rep_name_file_merged', 'rep_n_articles_files', 'id').last()
             reports['rep_name_file_merged'] = f'{settings.MEDIA_URL}/files/bib/{reports['rep_name_file_merged']}'
+            reports['disabled'] = ''
         else:
-            reports['rep_name_file_merged'] = None
+            reports = {
+                'rep_name_file_merged': '#',
+                'rep_n_articles_files': 0,
+                'id': 0,
+                'disabled': 'btn-a-disabled',
+            }
 
         return reports
 
