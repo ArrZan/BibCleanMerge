@@ -5,13 +5,78 @@
     border: 7px solid white;
     box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;
 }
-
+.container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+.card {
+    max-width: 600px;
+    margin: auto;
+    height: 90%;
+    background-color: transparent;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+.fixed-button {
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
+    z-index: 1000;
+    max-width: 600px;
+}
 .text_info {
     color: #7F7F7F;
 }
 
 .card_form {
     height: 70%;
+}
+.btn_subirfoto{
+    background-color: var(--blue-dark) ;
+    color: white;
+}
+
+/* CAMBIOS PARA LOS MODAL GENERAL --------------------------------------------------------------------- */
+
+.modal-content {
+    -webkit-box-shadow: 4px 4px 7px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 4px 4px 7px rgba(0, 0, 0, 0.3);
+    box-shadow: 4px 4px 7px rgba(0, 0, 0, 0.3);
+}
+
+.modal .modal-header {
+    justify-content: center;
+    position: relative;
+
+    padding: 10px 16px;
+}
+
+.modal .modal-header .btn-close {
+    margin: 0;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+}
+
+.modal-header i {
+    font-size: 32px;
+    margin: 0 15px;
+}
+
+.modal-footer {
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+.modal-footer .btn-primary {
+    background: var(--blue-dark);
+    border: 0;
+}
+
+.modal-footer .btn-secondary {
+    background: var(--orange);
+    border: 0;
 }
 
 @media (max-width: 1267px) {

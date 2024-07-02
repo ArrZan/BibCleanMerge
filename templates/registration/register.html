@@ -31,7 +31,7 @@
                                     </span>
 										<input type="text" id="id_username" class="form-control" placeholder="Usuario"
 										       aria-label="Usuario" name="username"
-										       aria-describedby="basic-addon1">
+										       aria-describedby="basic-addon1" value="{{ form.username.value|default:''  }}">
 									</div>
 								</div>
 
@@ -41,9 +41,8 @@
                                         <i class="bi bi-person-vcard-fill"></i>
                                     </span>
 										<input type="text" id="id_first_name" class="form-control"
-										       placeholder="Nombres"
-										       name="first_name"
-										       aria-describedby="basic-addon1">
+										       placeholder="Nombres"  name="first_name"
+										       aria-describedby="basic-addon1" value="{{ form.first_name.value|default:''  }}">
 									</div>
 								</div>
 
@@ -54,7 +53,7 @@
                                     </span>
 										<input type="text" id="id_last_name" class="form-control"
 										       placeholder="Apellidos"
-										       name="last_name">
+										       name="last_name" value="{{ form.last_name.value|default:''  }}">
 									</div>
 								</div>
 
@@ -64,8 +63,7 @@
                                         <i class="bi bi-envelope-fill"></i>
                                     </span>
 										<input type="email" id="id_email" class="form-control" placeholder="example@dominio
-										.com"
-										       name="email">
+										.com" name="email" value="{{ form.email.value|default:''  }}">
 									</div>
 								</div>
 
@@ -76,7 +74,7 @@
                                     </span>
 										<input type="password" id="id_password1" class="form-control"
 										       placeholder="Contraseña"
-										       name="password1">
+										       name="password1" value="{{ form.password1.value|default:''  }}">
 									</div>
 								</div>
 
@@ -87,7 +85,7 @@
                                     </span>
 										<input type="password" id="id_password2" class="form-control"
 										       placeholder="Repetir Contraseña"
-										       name="password2">
+										       name="password2" value="{{ form.password2.value|default:''  }}">
 									</div>
 								</div>
 
@@ -113,30 +111,13 @@
 	</div>
 	
 	{% if form.errors %}
-		<div class="toast show position-fixed top-0 start-50 translate-middle-x" role="alert"
-		     aria-live="assertive" aria-atomic="true" data-delay="5000" style="z-index: 1050;">
-			<div class="toast-header">
-				<strong class="me-auto">Error al Grabar</strong>
-				<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-			</div>
-			<div class="toast-body">
-				{{ form.errors }}
+		<div id="bodyAlertPlaceholder" class="fixed-button">
+			<div>
+				<div class="alert alert-success alert-dismissible" role="alert">
+					<div>{{ form.errors }}</div>
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
 			</div>
 		</div>
-
-		<script>
-            // Mostrar el toast cuando la página cargue
-            document.addEventListener('DOMContentLoaded', function () {
-                var toastEl = document.querySelector('.toast');
-                var toast = new bootstrap.Toast(toastEl); // Inicializar el toast de Bootstrap
-
-                toast.show(); // Mostrar el toast
-
-                // Ocultar el toast después de 5 segundos
-                setTimeout(function () {
-                    toast.hide();
-                }, 5000);
-            });
-		</script>
 	{% endif %}
 {% endblock %}

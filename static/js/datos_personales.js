@@ -1,10 +1,10 @@
 document.getElementById('uploadButton').addEventListener('click', function () {
-    document.getElementById('formFile').click();
+    document.getElementById('id_profile_picture').click();
 });
 
-document.getElementById('formFile').addEventListener('change', function () {
-    var fileName = this.files[0].name;
-    document.getElementById('fileName').value = fileName;
+document.getElementById('id_profile_picture').addEventListener('change', function () {
+    var valor = this.files[0].name;
+    document.getElementById('fileName').value = valor;
 });
 
 document.getElementById('confirmPassword').addEventListener('input', validatePassword);

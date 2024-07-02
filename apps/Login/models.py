@@ -9,4 +9,4 @@ class User(AbstractUser):
 
     def __str__(self):
         # Se presenta el primer nombre y primer apellido y no los dos.
-        return f'{self.first_name.split(' ')[0]} {self.last_name.split(' ')[0]}'
+        return '{} {}'.format(self.first_name.split(' ')[0], self.last_name.split(' ')[0])
