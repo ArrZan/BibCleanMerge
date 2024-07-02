@@ -1,10 +1,148 @@
-.table_container {
-    overflow-y: auto;
+.container_content {
+    position: relative;
 }
 
-table thead th,
-table tbody th,
-table tbody td {
+.data-container {
+    padding: 10px;
+    overflow-y: auto;
+    display: none;
+    position: relative;
+}
+
+#data-modal {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+}
+
+.data-container > form span {
+    cursor: pointer;
+    display: block;
+
+}
+
+.data-container > form input,
+.data-container > form span:first-child {
+    font-weight: bold;
+    font-size: calc(1.325rem + .1vw);
+    width: 95%;
+}
+
+.data-container > form input:focus {
+    font-weight: normal;
+}
+
+.data-container > form input,
+.data-container > form textarea {
+    display: none;
+}
+
+.data-container > form textarea {
+}
+
+.data-files tbody td:last-child,
+.data-files tbody td form {
+    display: flex;
+
+}
+
+.data-files tbody td span {
+    cursor: pointer;
+}
+
+.data-files .td-form {
+    display: none;
+}
+
+.data-files .td-form form {
+    align-items: center;
+}
+
+.td-form form .form-control {
+    padding: 0 .75rem;
+}
+
+.data-files .td-form.form-display {
+    display: block;
+}
+
+.data-files input,
+.data-files button {
+    border-radius: 25px;
+}
+
+.data-files form button {
+    width: 41px;
+    height: 30px;
+    padding: 0;
+    border-radius: 50%;
+}
+
+.data-files form i {
+    font-size: 20px;
+}
+
+.table_container {
+    height: 100%;
+    overflow-y: auto;
+    display: none;
+}
+
+.table_container::-webkit-scrollbar {
+    width: 5px;
+    /* Tamaño de la barra de desplazamiento */
+    background-color: #082c50;
+    /* Color de fondo de la barra de desplazamiento */
+}
+
+.table_container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    /* Color de fondo de la pista de desplazamiento */
+    border-radius: 10px;
+    /* Borde redondeado de la pista de desplazamiento */
+}
+
+.table_container::-webkit-scrollbar-thumb {
+    background: #194466;
+    /* Color del pulgar de la barra de desplazamiento */
+    border-radius: 2px;
+    /* Borde redondeado del pulgar de desplazamiento */
+}
+
+.table_container::-webkit-scrollbar-thumb:hover {
+    background-color: #082c50;
+    /* Color del pulgar de la barra de desplazamiento al pasar el ratón */
+}
+
+.table_container.table-display,
+.data-container.table-display {
+    display: block;
+}
+
+.container_content > button.btn {
+    position: absolute;
+    font-size: 30px;
+    top: 34px;
+    right: 34px;
+    padding: 0;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    opacity: 0;
+    visibility: hidden;
+}
+
+.container_content > button.btn:hover,
+.table_container:hover ~ .btn {
+    opacity: 1;
+    visibility: visible;
+}
+
+.table_container table tbody th,
+.table_container table tbody td {
     height: 70px;
     text-align: center;
 }
@@ -28,17 +166,163 @@ span svg {
     color: white;
 }
 
-.col-2 {
+
+.row .col-3 {
     height: 100%;
 }
 
 .container_files {
-    height: 100%;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    border-right: 2px solid #ddd;
+}
+
+.container_files::-webkit-scrollbar {
+    width: 5px;
+    /* Tamaño de la barra de desplazami
+    /* Color de fondo de la barra de desplazamiento */
+}
+
+.container_files::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    /* Color de fondo de la pista de desplazamiento */
+    border-radius: 10px;
+    /* Borde redondeado de la pista de desplazamiento */
+}
+
+.container_files::-webkit-scrollbar-thumb {
+    background: #082c50;
+    /* Color del pulgar de la barra de desplazamiento */
+    border-radius: 2px;
+    /* Borde redondeado del pulgar de desplazamiento */
+}
+
+.container_files::-webkit-scrollbar-thumb:hover {
+    background-color: #082c50;
+    /* Color del pulgar de la barra de desplazamiento al pasar el ratón */
+}
+
+.title-list {
+    cursor: default;
+    display: block;
+    border-radius: 20px;
+    padding: .5rem;
+    width: 95%;
+}
+
+.title-list:hover {
+    background-color: #E5E8ED;
+    cursor: pointer;
+}
+
+.list-group {
+    border: 0;
+    border-radius: 0;
+    height: auto;
     overflow-y: auto;
 }
 
-.list-group-item {
-    border-radius: 10px;
+.list-item {
+    position: relative;
+    display: flex;
+    cursor: pointer;
+    justify-content: space-between;
+    margin: .5rem;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.list-item h5 {
+    margin: .5rem .5rem .5rem 1rem;
+}
+
+.list-item button {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.list-item:hover,
+.active_list {
     background-color: #E5E8ED;
-    font-size: 12px;
+    color: #082c50;
+}
+
+.active_list {
+    font-weight: bolder;
+}
+
+.list-item:hover button {
+    opacity: 1;
+    visibility: visible;
+}
+
+.list-item button.btn_primary {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 0 4px;
+    border-radius: 50%;
+}
+
+
+/*UTILS ------------------------------------------------------------------------------------------------------*/
+.info-guide img {
+    width: 90%;
+}
+
+.info-guide img:last-child {
+    display: block !important; /* Mostramos la última porque en el anterior lo ocultamos */
+}
+
+
+
+
+
+
+/*QUERIES ----------------------------------------------------------------------------------------*/
+
+@media (max-width: 768px) {
+    .container_content {
+        flex-direction: column;
+        max-height: 100%;
+        overflow: auto;
+        padding: 20px 0;
+    }
+
+    .data-container {
+        padding: 10px 10px 80px 10px;
+    }
+
+    .data-container form input {
+        width: 100%;
+    }
+
+    .container_content > button.btn {
+        top: 140px;
+        right: 32px;
+    }
+
+    .container_files {
+        width: 100%;
+        padding: 10px 14px;
+        border-right: none;
+        border-bottom: 2px solid #ddd;
+    }
+
+    .list-group {
+        display: none;
+        /* Oculta la lista en pantallas pequeñas */
+    }
+
+    .dropdown {
+        display: block;
+        /* Muestra el select en pantallas pequeñas */
+    }
+}
+
+@media (max-height: 768px) {
+    .container_content {
+        max-height: 100%;
+    }
 }

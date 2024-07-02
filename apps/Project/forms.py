@@ -13,9 +13,10 @@ class ProjectForm(forms.ModelForm):
         self.fields['prj_name'].widget.attrs.update({
             'minlength': 10,
             'maxlength': 50,
+            'required': True,
         })
         self.fields['prj_description'].widget.attrs.update({
             'placeholder': 'Dale una descripción a tu proyecto',
-            'style': 'height: 100px;'
+            'style': 'height: 100px;',
+            'required': False,
         })
-        self.fields['prj_name'].required = True

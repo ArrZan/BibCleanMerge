@@ -3,7 +3,7 @@ import sys
 import time
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse, Http404, HttpResponseRedirect
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, View, DetailView, DeleteView, UpdateView, CreateView
@@ -41,12 +41,28 @@ class ListProjectsView(LoginRequiredMixin, ListView):
 
 
 """
+---------------------------------------------------------------------- Autoguardado de un proyecto
+"""
+
+
+class AutoSaveProjectView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        project_id = kwargs['project_id']  # Obtenemos el id del proyecto del parámetro kwargs de la url
+        try:
+            project = Project.objects.get(id=project_id)
+            project.prj_autosave = True  # Actualiza el campo autoguardado a True
+            project.save()  # Guardamos
+            return JsonResponse({'message': 'Proyecto guardado.'})
+        except Project.DoesNotExist:
+            return JsonResponse({'error': 'Proyecto no encontrado.'}, status=404)
+
+
+"""
 ---------------------------------------------------------------------- Creación de un proyecto
 """
 
 
 class CreateProjectView(LoginRequiredMixin, CreateView):
-    template_name = 'Project/list_Projects.html'
     model = Project
     form_class = ProjectForm
 
@@ -56,20 +72,63 @@ class CreateProjectView(LoginRequiredMixin, CreateView):
 
         return super().form_valid(form)
 
+    def form_invalid(self, form):
+        return HttpResponseRedirect(reverse_lazy('list_projects'))
+
     def get_success_url(self):
         # Redirigimos a la vista de gestión/edición del proyecto recién creado
         return reverse_lazy('edit_project', kwargs={'pk': self.object.pk})
 
 
 """
----------------------------------------------------------------------- Gestión o edición de un proyecto
+---------------------------------------------------------------------- Update de un proyecto
 """
 
 
-class EditProjectView(LoginRequiredMixin, DetailView):
+class UpdateProjectFilesView(LoginRequiredMixin, UpdateView):
+    model = Project
+    form_class = ProjectForm
+
+
+"""
+---------------------------------------------------------------------- Update de un proyecto
+"""
+
+
+class UpdateProjectView(LoginRequiredMixin, AccessProjectMixin, UpdateView):
+    model = Project
+    form_class = ProjectForm
+
+    def form_valid(self, form):
+        project = self.get_object()
+
+        for field, value in form.cleaned_data.items():
+            # Obtenemos el valor sin alterar del campo iterado
+            current_value = getattr(project, field)
+            # Consultamos si hubo algún cambio
+            if value != current_value:
+                # __dict__ nos devuelve un diccionario de los atributos de la instancia project,
+                # entonces modificamos el campo para actualizarlo
+                project.__dict__[field] = value
+
+        project.save()
+
+        return JsonResponse({'message': 'Proyecto actualizado.'})
+
+    def form_invalid(self, form):
+        # En caso de errores de validación, devolvemos un JSON con los errores
+        errors = form.errors.as_json()
+        return JsonResponse({'errors': errors}, status=400)
+
+
+"""
+---------------------------------------------------------------------- Gestión o edición de los archivos del proyecto
+"""
+
+
+class EditProjectView(LoginRequiredMixin, AccessProjectMixin, DetailView):
     template_name = 'Project/edit_project.html'
     model = Project
-    fields = ['prj_name', 'prj_description']  # Campos del modelo que incluimos en el formulario
     success_url = reverse_lazy('edit_project')
 
     def get_context_data(self, **kwargs):
@@ -98,23 +157,6 @@ class DeleteProjectView(LoginRequiredMixin, AccessProjectMixin, DeleteView):
             return JsonResponse({'message': 'Proyecto eliminado.'})
         except Project.DoesNotExist:
             return JsonResponse({'error': 'Error: Proyecto no encontrado.'}, status=404)
-
-
-"""
----------------------------------------------------------------------- Autoguardado de un proyecto
-"""
-
-
-class AutoSaveProjectView(LoginRequiredMixin, View):
-    def post(self, request, *args, **kwargs):
-        project_id = kwargs['project_id']  # Obtenemos el id del proyecto del parámetro kwargs de la url
-        try:
-            project = Project.objects.get(id=project_id)
-            project.prj_autosave = True  # Actualiza el campo autoguardado a True
-            project.save()  # Guardamos
-            return JsonResponse({'message': 'Proyecto guardado.'})
-        except Project.DoesNotExist:
-            return JsonResponse({'error': 'Proyecto no encontrado.'}, status=404)
 
 
 """

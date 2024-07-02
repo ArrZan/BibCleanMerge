@@ -19,7 +19,7 @@ from main import settings
 class Project(models.Model):
     id_usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     prj_name = models.CharField(max_length=50)
-    prj_description = models.CharField(max_length=255)
+    prj_description = models.TextField(default='Sin descripción', null=True, blank=True)
     prj_date = models.DateField(auto_now_add=True)  # Permite agregar la fecha actual al registrar
     prj_last_modified = models.DateField(auto_now=True)  # Permite agregar la fecha al modificar
     prj_autosave = models.BooleanField(default=False)  # Nos permite saber si el proyecto se autoguardó
@@ -31,7 +31,7 @@ class Project(models.Model):
 
         if self.reports.values():
             reports = self.reports.values('rep_name_file_merged', 'rep_n_articles_files', 'id').last()
-            # reports['rep_name_file_merged'] = f'{settings.MEDIA_URL}/files/bib/{reports['rep_name_file_merged']}'
+            reports['rep_name_file_merged'] = f'{settings.MEDIA_URL}/files/bib/{reports['rep_name_file_merged']}'
             reports['disabled'] = ''
         else:
             reports = {
@@ -169,6 +169,7 @@ class ProjectFile:
     def read_bibtext(file_decode):
         bib_database = bparser.loads(file_decode)
 
+        # Generador
         for entry in bib_database.entries:
             yield entry
 
@@ -280,7 +281,6 @@ class ProjectFile:
     @staticmethod
     def replace_slash(string):
         return string.replace('\n', ' ')
-
 
     def clean_black_sheep(self, entries, content):
         # Sacamos una lista completa de todos las entradas con regex

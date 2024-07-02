@@ -16,14 +16,20 @@
                 <h2>{{ object.prj_name }}</h2>
             </div>
         </div>
-        <div class="row mb-3">
+        <div class="row mb-3 d-flex align-items-center">
             <div class="col-md">
-                <p class="info_title">Gestión de la información del proyecto.</p>
+                <nav aria-label="breadcrumb">
+                  <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'list_projects' %}">Mis proyectos</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ object.prj_name }}</li>
+{#                    <li class="breadcrumb-item active" aria-current="page">Data</li>#}
+                  </ol>
+                </nav>
             </div>
             <div class="col d-flex justify-content-end align-items-center btn-float">
                 <button class="btn btn_primary me-2 col-auto fw-bold"
                     onclick="document.getElementById('fileInput').click()">
-                    <img src="/img/icon/add.png" alt="+">
+                    <img src="{% static 'img/utils/plus.svg' %}" alt="+">
                     <div class="text-bt">
                         Añadir Archivo
                     </div>
@@ -42,15 +48,36 @@
     <!-- Contenido de la pagina -->
     <div class="body-c">
         <div class="container_content d-flex flex-column flex-md-row">
+
+
             <div class="col-12 col-md-3 container_files border-2 container_files">
-                <B>Proyecto ABC</B>
+
+                <B class="title-list active_list">Proyecto</B>
+
                 <ul id="fileList" class="list-group p-2">
-                    <li class="list-item d-flex justify-content-between m-2 active_list">
-                        <h5 class="m-2">File 1</h5>
+                    <li class="list-item" data-file-id="1">
+                        <h5>File 1</h5>
                         <button class="btn btn_primary" data-bs-toggle="modal"
-                            data-bs-target="#eliminar_archivo">x</button>
+                            data-bs-target="#eliminar_archivo"><i class="bi bi-x"></i></button>
+                    </li>
+                    <li class="list-item" data-file-id="2">
+                        <h5>File 2</h5>
+                        <button class="btn btn_primary" data-bs-toggle="modal"
+                            data-bs-target="#eliminar_archivo"><i class="bi bi-x"></i></button>
+                    </li>
+                    <li class="list-item" data-file-id="3">
+                        <h5>File 3</h5>
+                        <button class="btn btn_primary" data-bs-toggle="modal"
+                            data-bs-target="#eliminar_archivo"><i class="bi bi-x"></i></button>
+                    </li>
+                    <li class="list-item" data-file-id="4">
+                        <h5>File 4</h5>
+                        <button class="btn btn_primary" data-bs-toggle="modal"
+                            data-bs-target="#eliminar_archivo"><i class="bi bi-x"></i></button>
                     </li>
                 </ul>
+
+
                 <select class="form-select dropdown oculto">
                     <option value="File 1">File 1</option>
                     <option value="File 2">File 2</option>
@@ -60,8 +87,103 @@
                     <option value="File 6" selected>File 6</option>
                     <option value="File 7">File 7</option>
                 </select>
+
             </div>
-            <div class="col table_container">
+
+            <div class="col data-container scroll-styled table-display">
+
+                <button class="btn btn_primary" data-bs-toggle="modal" id="data-modal"
+                        data-bs-target="#modal-info-forms"><i class="bi bi-exclamation-lg"></i></button>
+
+                <form action="{% url 'update_project' object.id %}" method="POST">
+                    <span class="mb-2">{{ object.prj_name }}</span>
+                    <input class="form-control mb-2" name="prj_name" type="text" placeholder="Nombre del proyecto" aria-label="Nombre del proyecto" value="{{ object.prj_name }}" minlength="10" required maxlength="50">
+
+                    <span class="mb-4">{{ object.prj_description }}</span>
+                    <textarea class="form-control mb-2" name="prj_description" placeholder="Descripción del proyecto" aria-label="Descripción del proyecto" id="textProject">{{ object.prj_description }}</textarea>
+
+                    {% csrf_token %}
+                    <button id="submit-btn" class="btn btn_primary disabled mb-3" type="submit">Guardar Cambios</button>
+                    <button class="btn btn_warning disabled mb-3" type="button">Deshacer Cambios</button>
+                </form>
+
+
+
+                <div class="data-files mt-2">
+                    <h5>Archivos</h5>
+                    <table class="table">
+
+                      <thead>
+                        <tr>
+                          <th class="col-3 col-md-4" scope="col">Nombre</th>
+                          <th scope="col">Variable</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <tr>
+                          <td>File 1</td>
+                          <td class="var-form">
+                              <span>mdo mdo mdomdo mdo mdomdo mdo mdomdo mdo mdomdo mdo mdomdo mdo mdomdo mdo mdo mdo mdo mdo mdo mdo mdo</span>
+                              <div class="td-form">
+                                  <form class=" ms-2" action="" method="POST">
+                                    {% csrf_token %}
+                                    <input class="form-control  me-2" type="text" placeholder="Variable" aria-label="Variable">
+                                    <button id="submit-btn" class="btn btn_primary me-2" type="submit">
+                                        <i class="bi bi-check"></i>
+                                    </button>
+                                    <button id="submit-btn" class="btn btn_primary" type="button">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </form>
+                              </div>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>File 2</td>
+                          <td class="var-form">
+                              <span>fat</span>
+                              <div class="td-form">
+                                  <form class=" ms-2" action="" method="POST">
+                                    {% csrf_token %}
+                                    <input class="form-control  me-2" type="text" placeholder="Variable" aria-label="Variable">
+                                    <button id="submit-btn" class="btn btn_primary me-2" type="submit">
+                                        <i class="bi bi-check"></i>
+                                    </button>
+                                    <button id="submit-btn" class="btn btn_primary" type="button">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </form>
+                              </div>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>File 3</td>
+                          <td class="var-form">
+                              <span>twitter</span>
+                              <div class="td-form">
+                                  <form class=" ms-2" action="" method="POST">
+                                    {% csrf_token %}
+                                    <input class="form-control  me-2" type="text" placeholder="Variable" aria-label="Variable">
+                                    <button id="submit-btn" class="btn btn_primary me-2" type="submit">
+                                        <i class="bi bi-check"></i>
+                                    </button>
+                                    <button id="submit-btn" class="btn btn_primary" type="button">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </form>
+                              </div>
+                          </td>
+                        </tr>
+
+                      </tbody>
+                    </table>
+                </div>
+
+            </div>
+            <div id="table1" class="col table_container">
                 <table class="table table-striped table-hover">
                     <thead>
                         <tr>
@@ -151,6 +273,279 @@
                     </tbody>
                 </table>
             </div>
+            <div id="table2" class="col table_container">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Autores</th>
+                            <th scope="col">Descripción</th>
+                            <th scope="col">Keys</th>
+                            <th scope="col">...</th>
+                            <th scope="col">...</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        <!-- agregar nuevo proyecto -->
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="table3" class="col table_container">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Autores</th>
+                            <th scope="col">Descripción</th>
+                            <th scope="col">Keys</th>
+                            <th scope="col">...</th>
+                            <th scope="col">...</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        <!-- agregar nuevo proyecto -->
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="table4" class="col table_container">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Autores</th>
+                            <th scope="col">Descripción</th>
+                            <th scope="col">Keys</th>
+                            <th scope="col">...</th>
+                            <th scope="col">...</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        <!-- agregar nuevo proyecto -->
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Articulo</td>
+                            <td>Autor1,Autor2</td>
+                            <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </td>
+                            <td>keys1, keys2</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <button class="btn btn_primary close-content"><i class="bi bi-x"></i></button>
+
         </div>
 
 {#        <div class="content-project">#}
@@ -193,6 +588,43 @@
                 </div>
             </div>
         </div>
+    
+    
+    <!-- Modal PARA GUÍA DE EDICIÓN DE PROYECTOS --------------------------------------------------------->
+
+    <div class="modal fade" id="modal-info-forms" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h1 class="modal-title fs-4" id="exampleModalLabel">Guía para el Usuario</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            </div>
+
+            <div class="modal-body">
+
+                    
+                <p>Bienvenido a la mini guía para <strong>editar datos del proyecto</strong>.</p>
+                <p>Si quieres cambiar el título, descripción o alguna variables de un archivo, solo <strong>haz doble click
+                    en el texto:</strong></p>
+                <div class="info-guide">
+                    <img src="{% static 'img/utils/form_guide.png' %}" alt="Guía para editar proyecto.">
+                    <p class="my-2">Se te habilitará para poder editar tal como se muestra:</p>
+                    <img src="{% static 'img/utils/form_guide_2.png' %}" alt="Guía para editar proyecto habilitado.">
+                </div>
+
+
+            </div>
+
+            <div class="modal-footer">
+{#                <button type="button" class="btn btn-primary">No volver a mostrar</button>#}
+                <button type="button" data-bs-dismiss="modal" class="btn btn-primary">Aceptar</button>
+            </div>
+        </div>
+        </div>
+    </div>
 {% endblock %}
 
 

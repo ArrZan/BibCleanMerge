@@ -1,5 +1,4 @@
 from django.shortcuts import redirect
-from django.http import Http404
 
 
 class ReturnHomeMixin:
@@ -10,6 +9,8 @@ class ReturnHomeMixin:
         return super().dispatch(request, *args, **kwargs)
 
 
+# Mixin para limitar el acceso de los proyectos únicamente para su propietario
+# Si se va a usar colaboradores, hay que cambiar esto o adaptarlo con los roles o permisos
 class AccessProjectMixin:
     def dispatch(self, request, *args, **kwargs):
         obj = self.get_object()

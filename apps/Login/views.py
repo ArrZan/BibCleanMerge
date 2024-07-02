@@ -1,8 +1,7 @@
 from urllib import request
 
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordChangeView
-from django.shortcuts import redirect, render
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.contrib import messages
 from django.conf import settings
