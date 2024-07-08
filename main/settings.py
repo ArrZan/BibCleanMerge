@@ -84,7 +84,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'BibCleanMerge',
-        'HOST': 'DESKTOP-PLOD91E',
+        'HOST': 'LAPTOPBRIGNER10',
         'PORT': '',
 
         'OPTIONS': {
@@ -123,7 +123,7 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = True   
 
 
 # Static files (CSS, JavaScript, Images)
@@ -188,14 +188,22 @@ JAZZMIN_SETTINGS = {
 }
 # Esto es para controlar el tiempo de inactividad y posterior cerrado ce sesión
 AUTO_LOGOUT = {
-    'IDLE_TIME': timedelta(minutes=1),
+    'IDLE_TIME': timedelta(minutes=20),
     'REDIRECT_TO_LOGIN_IMMEDIATELY': True,
     'MESSAGE': 'La sesión ha expirado. Vuelva a iniciar sesión para continuar.',
 }
 
-#Controlar la cantidad de intentos de inicio de sesión, en este caso se limitó a 5 intentos(NO FUNCIONA)
+#Controlar la cantidad de intentos de inicio de sesión, en este caso se limitó a 5 intentos
 
+# configuramos para que axes maneje la autenticacion y permita bloquear es usuario correctamente, si esto el usuario
+# puede ingresar al sistema colocando correctamente las credenciales saltandose el tiempo de espera
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
 AXES_FAILURE_LIMIT = 5
-AXES_COOLOFF_TIME = timedelta(minutes=5)
-AXES_RESET_ON_SUCCESS = True
-AXES_LOCKOUT_PARAMETERS = ['username', 'ip_address']
+AXES_COOLOFF_TIME = timedelta(minutes=1)
+AXES_RESET_ON_SUCCESS = False
+AXES_LOCKOUT_PARAMETERS = ['username']
+AXES_LOCKOUT_URL = '/accounts/registration/account_locked/' #redirige a una vista que se personalizo para mejor
+# comprencion del usuarip
