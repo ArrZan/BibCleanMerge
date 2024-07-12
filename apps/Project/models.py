@@ -31,8 +31,8 @@ class Project(models.Model):
 
         if self.reports.values():
             reports = self.reports.values('rep_name_file_merged', 'rep_n_articles_files', 'id').last()
-            reports['rep_name_file_merged'] = f'{settings.MEDIA_URL}/files/bib/{reports['rep_name_file_merged']}'
-            reports['disabled'] = ''
+            # reports['rep_name_file_merged'] = f'{settings.MEDIA_URL}/files/bib/{reports['rep_name_file_merged']}'
+            # reports['disabled'] = ''
         else:
             reports = {
                 'rep_name_file_merged': '#',

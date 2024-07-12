@@ -3,31 +3,19 @@ document.getElementById('uploadButton').addEventListener('click', function () {
 });
 
 document.getElementById('id_profile_picture').addEventListener('change', function () {
-    var valor = this.files[0].name;
-    document.getElementById('fileName').value = valor;
-});
+            var file = this.files[0];
+            if (file) {
+                // Actualizar el valor del input de texto con el nombre del archivo
+                document.getElementById('fileName').value = file.name;
 
-document.getElementById('confirmPassword').addEventListener('input', validatePassword);
-
-function validatePassword() {
-    var newPassword = document.getElementById('newPassword').value;
-    var confirmPassword = document.getElementById('confirmPassword').value;
-    var validationMessage = document.getElementById('mensaje_validacion');
-
-    if (newPassword === confirmPassword && newPassword !== "") {
-        document.getElementById('newPassword').style.borderColor = 'green';
-        document.getElementById('confirmPassword').style.borderColor = 'green';
-        validationMessage.textContent = "Las contraseñas coinciden.";
-        validationMessage.style.color = 'green';
-    } else {
-        document.getElementById('newPassword').style.borderColor = 'red';
-        document.getElementById('confirmPassword').style.borderColor = 'red';
-        validationMessage.textContent = "Las contraseñas no coinciden.";
-        validationMessage.style.color = 'red';
-    }
-}
-
-document.getElementById('limpiarButton').addEventListener('click', limpiarFormulario);
+                // Crear un objeto URL para la imagen seleccionada
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('image_profile').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
 
 function limpiarFormulario() {
     document.getElementById('newPassword').value = '';
