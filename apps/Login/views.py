@@ -72,6 +72,10 @@ class UpdateUserView(LoginRequiredMixin, UpdateView):
             messages.warning(self.request, 'No se realizaron cambios.')
             return super().form_invalid(form)
 
+    # el usuario solo pueda actualizar su propio perfil
+    def get_object(self, queryset=None):
+        return self.request.user
+
     def get_success_url(self):
         return self.request.path
 

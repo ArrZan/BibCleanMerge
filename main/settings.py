@@ -188,7 +188,7 @@ JAZZMIN_SETTINGS = {
 }
 # Esto es para controlar el tiempo de inactividad y posterior cerrado ce sesión
 AUTO_LOGOUT = {
-    'IDLE_TIME': timedelta(minutes=30),
+    'IDLE_TIME': timedelta(minutes=1),
     'REDIRECT_TO_LOGIN_IMMEDIATELY': True,
     'MESSAGE': 'La sesión ha expirado. Vuelva a iniciar sesión para continuar.',
 }
