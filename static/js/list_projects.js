@@ -1,4 +1,3 @@
-const $d = document;
 const blur_item = $d.querySelector('.blur-section-item');
 const items = $d.querySelector('.items');
 
@@ -30,7 +29,7 @@ function showOptions(element) {
 
 
     // Dejamos de hacer foco en el item seleccionado quitandole la clase resalted
-    blur_item.addEventListener('click', (e) => {
+    blur_item.addEventListener('click', function() {
         removeResalted(item, menu_option);
     });
 
@@ -343,7 +342,7 @@ $d.addEventListener("DOMContentLoaded", function () {
     // ENVIAR ARCHIVOS SELECCIONADOS AL BACKEND PARA PROCESAMIENTO RÁPIDO ----------------------------------------------------------------
 
     // Botón para enviar archivos al backend a procesar
-    btnSendFiles.addEventListener('click', e => {
+    btnSendFiles.addEventListener('click', function() {
 
         if (Object.keys(files_upload).length > 0) {
             let url_view = btnSendFiles.dataset.projectUrl;
@@ -398,20 +397,20 @@ $d.addEventListener("DOMContentLoaded", function () {
 
 });
 
-// MOSTRADOR DE ALERTAS DE BOOSTRAP ---------------------------------------------------------------
-
-const appendAlert = (message, type, idAlertDiv='modalAlertPlaceholder') => {
-    const alertPlaceholder = $d.getElementById(idAlertDiv);
-    const wrapper = $d.createElement('div');
-    wrapper.innerHTML = [
-    `<div class="alert alert-${type} alert-dismissible" role="alert">`,
-    `   <div>${message}</div>`,
-    '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
-    '</div>'
-    ].join('');
-
-    alertPlaceholder.append(wrapper);
-};
+// // MOSTRADOR DE ALERTAS DE BOOSTRAP ---------------------------------------------------------------
+//
+// const appendAlert = (message, type, idAlertDiv='modalAlertPlaceholder') => {
+//     const alertPlaceholder = $d.getElementById(idAlertDiv);
+//     const wrapper = $d.createElement('div');
+//     wrapper.innerHTML = [
+//     `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+//     `   <div>${message}</div>`,
+//     '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+//     '</div>'
+//     ].join('');
+//
+//     alertPlaceholder.append(wrapper);
+// };
 
 
 // Función para verificar si hay items y presentar una imagne
@@ -421,16 +420,4 @@ function verificateItems() {
     } else {
         $d.querySelector('.non-image').classList.remove('n-inactive');
     }
-}
-
-// Función para activar el blur de carga
-function blur_active() {
-    $d.querySelector('.blur-shadow').classList.add('shadow-loader');
-    $d.querySelector('.modal').style.zIndex = 4;
-    $d.querySelector('.modal-backdrop.show').style.zIndex = 2;
-}
-
-// Función para desactivar el blur de carga
-function blur_inactive() {
-    $d.querySelector('.blur-shadow').classList.remove('shadow-loader');
 }

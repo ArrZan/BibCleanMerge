@@ -1,3 +1,5 @@
+const $d = document;
+
 let mainCont = document.querySelector('.main-container');
 
 // Botón sidebar para mostrar y ocultar el sidebar
@@ -50,3 +52,31 @@ document.querySelector('.navbar-btn').addEventListener('click', function() {
 //         }
 //     });
 // });
+
+
+
+// MOSTRADOR DE ALERTAS DE BOOSTRAP ---------------------------------------------------------------
+
+const appendAlert = (message, type, idAlertDiv='modalAlertPlaceholder') => {
+    const alertPlaceholder = $d.getElementById(idAlertDiv);
+    const wrapper = $d.createElement('div');
+    wrapper.innerHTML = [
+    `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+    `   <div>${message}</div>`,
+    '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+    '</div>'
+    ].join('');
+
+    alertPlaceholder.append(wrapper);
+
+    // Eliminar la alerta después de 3 segundos
+    setTimeout(() => {
+        wrapper.querySelector('.alert').classList.add('alert-slide-out');
+
+        setTimeout(() => {
+            wrapper.remove(); // Elimina el elemento del DOM
+        }, 1001);// 1 segundos
+
+    }, 3000); // 3000 milisegundos = 3 segundos
+
+};

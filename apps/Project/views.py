@@ -1,18 +1,24 @@
+import json
 import re
 import sys
 import time
+import itertools
+
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
 from django.http import JsonResponse, Http404, HttpResponseRedirect
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, View, DetailView, DeleteView, UpdateView, CreateView
 from django.contrib import messages
+from django.db.models import F, Value, TextField, CharField, Case, Value, When
+from django.db.models.functions import Coalesce
 
-from apps.Login.Mixins import AccessProjectMixin
-from apps.Project.forms import ProjectForm
-from apps.Project.models import ProjectFile, Project, Report
 from main import settings
+from .models import ProjectFile, Project, Report, ProjectFiles, ProjectFilesEntries, Base
+from .Mixins import AccessOwnerMixin
+from .forms import ProjectForm
 
 # Importanción de librería para parsear los archivos bib
 import bibtexparser as bparser
@@ -68,16 +74,40 @@ class CreateProjectView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.id_usuario = self.request.user  # Asignamos el usuario actual al proyecto
+        form.instance.prj_description = self.request.POST['prj_description'] if self.request.POST['prj_description'] else 'Sin descripción.'
         form.instance.prj_autosave = True  # Esto es para indicar que el usuario si guardó el proyecto
 
         return super().form_valid(form)
 
     def form_invalid(self, form):
+        # INTENTAR ENVIAR LOS ERRORES POR EL TÍTULO REPETIDO
+        # errors = form.errors.as_json()
+        # return JsonResponse({'errors': errors}, status=400)
         return HttpResponseRedirect(reverse_lazy('list_projects'))
 
     def get_success_url(self):
         # Redirigimos a la vista de gestión/edición del proyecto recién creado
-        return reverse_lazy('edit_project', kwargs={'pk': self.object.pk})
+        return reverse_lazy('manage_project', kwargs={'pk': self.object.pk})
+
+
+"""
+---------------------------------------------------------------------- Update de la variable de un ProjectFile  
+"""
+
+
+class UpdateProjectFilesView(LoginRequiredMixin, AccessOwnerMixin, UpdateView):
+    model = ProjectFiles
+
+    def post(self, request, *args, **kwargs):
+        projectFile_id = kwargs['pk']  # Obtenemos el id del proyecto del parámetro kwargs de la url
+        try:
+            projectFile = ProjectFiles.objects.get(id=projectFile_id)
+            projectFile.pf_search_criteria = self.request.POST['pf_search_criteria']
+            projectFile.save()  # Guardamos
+
+            return JsonResponse({'message': 'Variable actualizada.'})
+        except Project.DoesNotExist:
+            return JsonResponse({'error': 'Proyecto de archivo no encontrado.'})
 
 
 """
@@ -85,17 +115,7 @@ class CreateProjectView(LoginRequiredMixin, CreateView):
 """
 
 
-class UpdateProjectFilesView(LoginRequiredMixin, UpdateView):
-    model = Project
-    form_class = ProjectForm
-
-
-"""
----------------------------------------------------------------------- Update de un proyecto
-"""
-
-
-class UpdateProjectView(LoginRequiredMixin, AccessProjectMixin, UpdateView):
+class UpdateProjectView(LoginRequiredMixin, AccessOwnerMixin, UpdateView):
     model = Project
     form_class = ProjectForm
 
@@ -118,7 +138,7 @@ class UpdateProjectView(LoginRequiredMixin, AccessProjectMixin, UpdateView):
     def form_invalid(self, form):
         # En caso de errores de validación, devolvemos un JSON con los errores
         errors = form.errors.as_json()
-        return JsonResponse({'errors': errors}, status=400)
+        return JsonResponse({'errors': json.loads(errors)})
 
 
 """
@@ -126,23 +146,77 @@ class UpdateProjectView(LoginRequiredMixin, AccessProjectMixin, UpdateView):
 """
 
 
-class EditProjectView(LoginRequiredMixin, AccessProjectMixin, DetailView):
+class ManageProjectView(LoginRequiredMixin, AccessOwnerMixin, DetailView):
     template_name = 'Project/edit_project.html'
     model = Project
-    success_url = reverse_lazy('edit_project')
+    success_url = reverse_lazy('manage_project')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        project = self.object
+
+        # Obtenemos los archivos asociados a este proyecto
+        # Annotate es para agregrar una nueva columna (search_criteria)
+        # Coalesce es una función que devuelve el registro no nulo, sino, devolverá N/A
+        # El ouutpt_fuield es para validación de que es un tipo string
+        project_files = project.files.annotate(
+            search_criteria=Coalesce(F('pf_search_criteria'), Value('N/A'), output_field=TextField()),
+        ).values('id', 'name_file', 'search_criteria')
+
+        # Lista para almacenar todas las entradas de archivos
+        all_entries = []
+        for project_file in project_files:
+            # Obtener el objeto Base correspondiente
+            project_file_obj = Base.objects.get(id=project_file['id'])
+            # Modificamos el nombre del archivo utilizando get_name_split()
+            project_file['name_file'] = project_file_obj.get_name_split()
+
+            all_entries.append(ProjectFilesEntries.objects.filter(id_project_files_id=project_file['id']))
+
+        context['project_files'] = project_files
+        context['all_entries'] = all_entries
+
         context['title'] = 'Gestión de Proyecto'
         return context
 
+
+"""
+---------------------------------------------------------------------- Eliminación de un archivo de un proyecto
+"""
+
+
+class DeleteProjectFileView(LoginRequiredMixin, AccessOwnerMixin, DeleteView):
+    model = ProjectFiles
+
+    def form_valid(self, form):
+        try:
+            # Obtenemos el objeto a eliminar
+            projectFile = self.get_object()
+
+            # nombre del archivo para eliminarlo del sistema
+            file_name = projectFile.name_file
+
+            # Eliminamos el objeto
+            projectFile.delete()
+
+            # Elimina el archivo del sistema de archivos
+            if file_name:
+                file_path = os.path.join(settings.MEDIA_ROOT, 'files', 'bib', file_name)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+
+            # Devolvemos una respuesta JSON indicando éxito
+            return JsonResponse({'message': 'Archivo eliminado.'})
+        except ProjectFiles.DoesNotExist:
+            return JsonResponse({'error': 'Error: Archivo no encontrado.'}, status=404)
 
 """
 ---------------------------------------------------------------------- Eliminación de un proyectos
 """
 
 
-class DeleteProjectView(LoginRequiredMixin, AccessProjectMixin, DeleteView):
+class DeleteProjectView(LoginRequiredMixin, AccessOwnerMixin, DeleteView):
     model = Project
 
     def form_valid(self, form):
@@ -164,7 +238,7 @@ class DeleteProjectView(LoginRequiredMixin, AccessProjectMixin, DeleteView):
 """
 
 
-class ReportDetailView(LoginRequiredMixin, AccessProjectMixin, DetailView):
+class ReportDetailView(LoginRequiredMixin, AccessOwnerMixin, DetailView):
     template_name = 'Project/detail_report.html'
     model = Report
 
@@ -181,6 +255,129 @@ class ReportDetailView(LoginRequiredMixin, AccessProjectMixin, DetailView):
         if not self.request.user.id == report.id_project.id_usuario.id:
             return False
         return True
+
+
+"""
+---------------------------------------------------------------------- Detalle de un reporte
+"""
+
+
+class ListReportsView(LoginRequiredMixin, ListView):
+    template_name = 'Project/list_reports.html'
+    model = Report
+    context_object_name = 'reports'
+
+    def get_queryset(self):
+        # Obtenemos el proyecto
+        print(self.kwargs['pk'])
+        project = get_object_or_404(Project, id=self.kwargs['pk'])
+        # Filtramos los reportes de este proyecto
+        return Report.objects.filter(id_project=project)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['project'] = get_object_or_404(Project, id=self.kwargs['pk'])
+        context['title'] = 'Reportes'
+        return context
+
+
+"""
+---------------------------------------------------------------------- Procesado
+"""
+
+
+class AddFileView(LoginRequiredMixin, View):
+
+    def post(self, request, *args, **kwargs):
+        try:
+            start_time = time.time()  # Tiempo de inicio de procesamiento
+
+            files = request.FILES
+
+            files_bib = []  # Guardaremos todos los file acá
+            # Iteramos los archivos para revalidar con el formato bib, sino, se omite el archivo
+            for file_key, file_obj in files.items():
+                if file_obj.name.endswith('.bib'):
+                    files_bib.append(file_obj)
+
+            if files_bib:
+                all_entries = []  # Lista para almacenar todos los entries de todos los archivos
+                project_id = kwargs['pk']
+
+                project = Project.objects.get(pk=project_id)
+
+                for file in files_bib:
+                    obj = ProjectFile()
+                    file_dec = obj.decode_file(file)
+
+                    name_date = datetime.now().strftime("%H%M%S")
+                    fileName = f'({self.request.user.id})_{name_date}___{file.name}'
+                    print(fileName.split('___'))
+
+                    # Guardar el archivo en 'media/files/bib'
+                    file_path = os.path.join(settings.MEDIA_ROOT, 'files', 'bib', fileName)
+                    with open(file_path, 'wb') as destination:
+                        for chunk in file.chunks():
+                            destination.write(chunk)
+
+                    newFile = ProjectFiles.objects.create(
+                        id_project=project,
+                        name_file=fileName,
+                    )
+
+                    fields = ['title', 'author', 'year', 'keywords', 'journal',
+                              'volume', 'number', 'pages', 'doi']
+
+                    entries = []  # Almacenamos los entrys del file
+                    count = 0
+                    with transaction.atomic():
+                        for entry in obj.read_bibtext_with_regex(file_dec, 30):
+                            entry_dict = {field: entry.get(field, 'N/A') for field in fields}
+                            entries.append(entry_dict)
+
+                            newEntrie = ProjectFilesEntries.objects.create(
+                                id_project_files=newFile,
+                                pfe_title=entry.get('title', 'N/A'),
+                                pfe_authors=entry.get('author', 'N/A'),
+                                pfe_year=entry.get('year', 'N/A'),
+                                pfe_keywords=entry.get('keywords', 'N/A'),
+                                pfe_journal=entry.get('journal', 'N/A'),
+                                pfe_volume=entry.get('volume', 'N/A'),
+                                pfe_number=entry.get('number', 'N/A'),
+                                pfe_pages=entry.get('pages', 'N/A'),
+                                pfe_doi=entry.get('doi', 'N/A'),
+                            )
+                            count += 1
+
+                            if count >= 30:
+                                break
+
+                        all_entries.append({'key': newFile.id, 'entries': entries, 'name': file.name})
+
+                formatted_time = Report.generate_timestamp(start_time)  # Tiempo formateado
+
+                return JsonResponse({'entries': all_entries, 'message': 'Todo bien', 'time_elapsed': formatted_time})
+            else:
+                return JsonResponse({'message': 'No se encontraron archivos .bib válidos'}, status=400)
+
+        except Exception as e:
+            # Depuración
+            tipo_excepcion, valor_excepcion, tb = sys.exc_info()
+            print(f"Tipo de excepción: {tipo_excepcion}")
+            print(f"Valor de la excepción: {valor_excepcion}")
+            print("Traceback:")
+            traceback_details = {
+                'filename': tb.tb_frame.f_code.co_filename,
+                'line': tb.tb_lineno,
+                'name': tb.tb_frame.f_code.co_name,
+            }
+            for name, value in traceback_details.items():
+                print(f"  {name}: {value}")
+
+            transaction.rollback()  # Rollback de la transacción en caso de error
+
+            return JsonResponse({'error': 'Ocurrió un error en el servidor!',
+                                 'error_message': str(e)}, status=500)
 
 
 """
@@ -305,25 +502,25 @@ class ProcesamientoView(LoginRequiredMixin, View):
                 # Crear el proyecto con un título y descripción predeterminados
                 new_project = Project.objects.create(
                     id_usuario=request.user,
-                    prj_name='Proyecto',
+                    prj_name=f'Proyecto recuperado [{name_date}]',
                     prj_description='Sin descripción.',
                 )
 
                 # Crear el reporte asociado a este proyecto
                 newReport = Report.objects.create(
                     id_project=new_project,
-                    rep_p_articles=purge.count_entry_type_all.get('article', 0),
-                    rep_p_conferences=purge.count_entry_type_all.get('conference', 0),
-                    rep_p_papers=purge.count_entry_type_all.get('paper', 0),
-                    rep_p_books=purge.count_entry_type_all.get('book', 0),
-                    rep_p_others=purge.count_entry_type_all.get('others', 0),
+                    name_file=name_File,
+                    articles=purge.count_entry_type_all.get('article', 0),
+                    conferences=purge.count_entry_type_all.get('conference', 0),
+                    papers=purge.count_entry_type_all.get('paper', 0),
+                    books=purge.count_entry_type_all.get('book', 0),
+                    others=purge.count_entry_type_all.get('others', 0),
                     rep_n_articles_files=purge.sheeps_ids,
                     rep_n_processed=purge.contArt - 1,
                     rep_n_duplicate=len(purge.black_sheeps_ids),
                     rep_duration_seg=elapsed_time,
                     rep_n_files=len(files_bib),
                     rep_size_file=size_File_bytes,
-                    rep_name_file_merged=name_File
                 )
 
                 # Redirigimos a la vista de detalle del reporte

@@ -6,46 +6,46 @@
 <!-- SIDEBAR-------------------------------------------------------------------------- -->
 <section class="sidebar">
 
-            <div class="sidebar-btn">
-                <i class="bi bi-chevron-left"></i>
-                <i class="bi bi-list"></i>
-            </div>
+	<div class="sidebar-btn">
+		<i class="bi bi-chevron-left"></i>
+		<i class="bi bi-list"></i>
+	</div>
 
-            <div class="header">
-                <div class="user_img">
-                    <img class="image_perfil" src="{{ user.profile_picture.url }}" alt="Imagen usuario">
-                </div>
+	<div class="header">
+		<div class="user_img">
+			<img class="image_perfil" src="{{ user.profile_picture.url }}" alt="Imagen usuario">
+		</div>
 
-                <div class="dato_personal">
-                    <h3 class="text text-center mb-0">{{ user }}</h3>
-                    <small class="text-center">{{ user.email }}</small>
-                </div>
-            </div>
+		<div class="dato_personal">
+			<h3 class="text text-center mb-0">{{ user }}</h3>
+			<small class="text-center">{{ user.email }}</small>
+		</div>
+	</div>
 
 
-            <div class="items">
+	<div class="items">
 
-                <a class="item active" href="{% url 'list_projects' %}">
-                    <i class="bi bi-file-earmark-text-fill"></i>
-                    <span class="text">Mis proyectos</span>
-                </a>
+		<a id="list-projects-link" class="item" href="{% url 'list_projects' %}">
+			<i class="bi bi-file-earmark-text-fill"></i>
+			<span class="text">Mis proyectos</span>
+		</a>
 
-                <a class="item" href="{% url 'update_user' user.id %}">
-                    <i class="bi bi-person-vcard-fill"></i>
-                    <span class="text">Datos Personales</span>
-                </a>
+		<a id="update-user-link" class="item" href="{% url 'update_user' user.id %}">
+			<i class="bi bi-person-vcard-fill"></i>
+			<span class="text">Datos Personales</span>
+		</a>
 
-            </div>
+	</div>
 
-            <div class="footer">
+	<div class="footer">
 
-                <div class="items">
-                    <a class="item" href="{% url 'logout' %}">
-                        <i class="bi bi-box-arrow-left"></i>
-                        <span class="text">Cerrar sesión</span>
-                    </a>
-                </div>
+		<div class="items">
+			<a class="item" href="{% url 'logout' %}">
+				<i class="bi bi-box-arrow-left"></i>
+				<span class="text">Cerrar sesión</span>
+			</a>
+		</div>
 
-            </div>
+	</div>
 
-        </section>
+</section>

@@ -1,11 +1,11 @@
-from urllib import request
-
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordChangeView
+from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.contrib import messages
-from django.conf import settings
-from axes.helpers import get_failure_limit
+
+from django.http import JsonResponse
+from django.utils import timezone
 
 from .models import User
 from django.views.generic import CreateView, UpdateView, TemplateView
@@ -42,9 +42,13 @@ class RegisterUserView(ReturnHomeMixin, CreateView):
         response = super().form_valid(form)
         username = form.cleaned_data.get('username')
         password = form.cleaned_data.get('password1')
-        user = authenticate(username=username, password=password)
+
+        # Autenticar al usuario: se añade el request ya el axes lo requiere
+        user = authenticate(self.request, username=username, password=password)
+
         if user is not None:
             login(self.request, user)
+
         return response
 
 
@@ -104,3 +108,7 @@ class UserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     def form_invalid(self, form):
         return super().form_invalid(form)
 
+
+
+def account_locked(request):
+    return render(request, 'registration/account_locked.html')

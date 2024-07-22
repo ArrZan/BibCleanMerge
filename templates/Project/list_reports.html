@@ -1,0 +1,147 @@
+{% extends 'Project/base_project.html' %}
+{% load static %}
+
+
+{% block cssCustoms2 %}
+    <link rel="stylesheet" href="{% static "css/list_projects.css" %}">
+    <link rel="stylesheet" href="{% static "css/loader.css" %}">
+{% endblock %}
+
+
+<!-- contenido de la pagina -->
+{% block content %}
+
+
+    <div class="header-c">
+        <div class="row">
+            <div class="col-md he-title">
+                <h2>REPORTES</h2>
+            </div>
+        </div>
+        <div class="row mb-3 d-flex align-items-center">
+            <div class="col-md">
+                <nav aria-label="breadcrumb">
+                  <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'list_projects' %}">Mis proyectos</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ project.prj_name }}</li>
+                  </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Contenido de la pagina -->
+    <div class="body-c">
+        <div class="content-project">
+
+            <div class="ct-body">
+                <div class="row header">
+                    <div class="col-r col1">Nombre del proyecto</div>
+                    <div class="col-r col2 d-flex justify-content-center">N. Artículos</div>
+                    <div class="col-r col3 d-flex justify-content-center">Fecha</div>
+                    <div class="col-r col4 d-flex justify-content-end">Opciones</div>
+                </div>
+
+                <div class="row body scroll-st scroll-style">
+                    <div class="items">
+
+                        {% for report in reports %}
+                        	<div class="item" data-project-id="{{ report.id }}">
+
+                                <a class="col1" href="#" style="cursor: default">
+                                    <span class="title-pj">Reporte {{ forloop.counter }}</span>
+                                </a>
+
+                                <div class="col2">
+                                    <div class="row1">
+                                        <div class="text col1">
+                                            <div class="num-pj">{{ report.rep_n_articles_files }}</div>
+                                        </div>
+
+                                        <div class="text col2">
+                                            <div class="date-pj">{{ project.prj_date|date:"d-m-Y" }}</div>
+                                        </div>
+
+                                        <div class="menu-options col3">
+                                            <button class="btn btn-options" onclick="showOptions(this)">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+
+
+                                            <div class="options">
+                                                <a class="btn btn-bar" href="{% url 'report_detail' report.id  %}">
+                                                    <i class="bi bi-bar-chart-line-fill"></i>
+                                                    <span class="text">Ver reporte</span>
+                                                </a>
+
+                                                <a class="btn btn-download" href="{{ report.name_file }}">
+                                                    <i class="bi bi-file-earmark-arrow-down-fill"></i>
+                                                    <span class="text">Descargar merged</span>
+                                                </a>
+
+                                                <button class="btn btn-trash" data-bs-toggle="modal" data-bs-target="#delete-project" data-project-id="{{ report.id }}" data-project-url="{% url 'delete_project' report.id %}" onclick="showDeleteModal(this)">
+                                                    <i class="bi bi-trash-fill"></i>
+                                                    <span class="text">Eliminar</span>
+                                                </button>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+
+<!-- Modal's -->
+
+{% block modals %}
+    <!-- Modal PARA ELIMINAR UN REPORTE ---------------------------------------------------------------------------->
+    <div class="modal fade" id="delete-project" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <i class="bi bi-folder-x"></i>
+                <h1 class="modal-title fs-4" id="exampleModalLabel">Eliminar proyecto</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            </div>
+
+            <div class="modal-body">
+                <p>¿Estás seguro de eliminar el proyecto <span id="project-name"></span>?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                {% csrf_token %}
+                <button type="button" class="btn btn-primary" id="delete-project-id" data-project-url="" data-project-id="" onclick="deleteProject(this)">Eliminar</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+
+    <div class="blur-shadow">
+        <span class="loader"></span>
+    </div>
+
+{% endblock modals %}
+
+{% block js %}
+    <script src="{% static "js/menu.js" %}"></script>
+    <script src="{% static "js/utils.js" %}"></script>
+    <script src="{% static "js/list_projects.js" %}"></script>
+{% endblock js %}

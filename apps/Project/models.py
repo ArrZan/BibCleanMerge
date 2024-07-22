@@ -1,5 +1,7 @@
+import re
 import os
 from datetime import datetime
+from unidecode import unidecode
 
 from django.db import models
 
@@ -7,9 +9,6 @@ from bibtexparser import bibdatabase as bd
 
 import bibtexparser as bparser
 
-import re
-
-from unidecode import unidecode
 
 from apps.Login.models import User
 from apps.Project.libs import PurgeData
@@ -24,18 +23,21 @@ class Project(models.Model):
     prj_last_modified = models.DateField(auto_now=True)  # Permite agregar la fecha al modificar
     prj_autosave = models.BooleanField(default=False)  # Nos permite saber si el proyecto se autoguardó
 
+    class Meta:
+        unique_together = ('id_usuario', 'prj_name')
+
     def __str__(self):
         return self.prj_name
 
     def get_last_report(self):
 
-        if self.reports.values():
-            reports = self.reports.values('rep_name_file_merged', 'rep_n_articles_files', 'id').last()
-            reports['rep_name_file_merged'] = f'{settings.MEDIA_URL}/files/bib/{reports['rep_name_file_merged']}'
+        if self.reports.exists():
+            reports = self.reports.values('name_file', 'rep_n_articles_files', 'id').last()
+            reports['name_file'] = f'{settings.MEDIA_URL}/files/bib/{reports['name_file']}'
             reports['disabled'] = ''
         else:
             reports = {
-                'rep_name_file_merged': '#',
+                'name_file': '#',
                 'rep_n_articles_files': 0,
                 'id': 0,
                 'disabled': 'btn-a-disabled',
@@ -44,56 +46,64 @@ class Project(models.Model):
         return reports
 
 
-class ProjectFiles(models.Model):
-    id_project_files = models.AutoField(primary_key=True)
-    id_project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    pf_name_file = models.CharField(max_length=100)
-    pf_p_articles = models.IntegerField()
-    pf_p_conferences = models.IntegerField()
-    pf_p_papers = models.IntegerField()
-    pf_p_books = models.IntegerField()
-    pf_p_others = models.IntegerField()
-    pf_n_entries_file = models.IntegerField()
+class Base(models.Model):
+    name_file = models.CharField(max_length=100)
+    articles = models.IntegerField(default=0)
+    conferences = models.IntegerField(default=0)
+    papers = models.IntegerField(default=0)
+    books = models.IntegerField(default=0)
+    others = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.pf_name_file
+        return self.name_file
+
+    def get_file_path(self):
+        if self.name_file:
+            return f'{settings.MEDIA_URL}/files/bib/{self.name_file}'
+        else:
+            return None
+
+    def get_name_split(self):
+        return self.name_file.split('___')[-1]
 
 
-# class ProjectFilesEntries(models.Model):
-#     id_project_files_entries = models.AutoField(primary_key=True)
-#     id_project_files = models.ForeignKey(ProjectFiles, on_delete=models.CASCADE)
-#     pfe_title = models.CharField(max_length=100)
-#     pfe_authors = models.CharField(max_length=255)
-#     pfe_journal = models.CharField(max_length=255)
-#     pfe_volume = models.IntegerField()
-#     pfe_keywords = models.TextField()
-#     pfe_number = models.IntegerField()
-#     pfe_pages = models.IntegerField()
-#     pfe_year = models.IntegerField()
-#     pfe_doi = models.CharField(max_length=100)
-#
-#     def __str__(self):
-#         return self.pfe_title
-#
+class ProjectFiles(Base):
+    id_project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='files')
+    pf_n_entries_file = models.IntegerField(default=0)
+    pf_search_criteria = models.TextField(blank=True, null=True)
 
-class Report(models.Model):
+    def getsearchVar(self):
+        return self.pf_search_criteria if self.pf_search_criteria else 'N/A'
+
+
+class ProjectFilesEntries(models.Model):
+    id_project_files = models.ForeignKey(ProjectFiles, on_delete=models.CASCADE, related_name='entries')
+    pfe_title = models.TextField(default='')
+    pfe_authors = models.TextField(default='')
+    pfe_year = models.CharField(default=0, max_length=4)
+    pfe_keywords = models.TextField(default='')
+    pfe_journal = models.CharField(max_length=255)
+    pfe_volume = models.CharField(default=0, max_length=10)
+    pfe_number = models.CharField(default=0, max_length=20)
+    pfe_pages = models.CharField(default=0, max_length=20)
+    pfe_doi = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.pfe_title
+
+
+class Report(Base):
     id_project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='reports')
-    rep_p_articles = models.IntegerField()
-    rep_p_conferences = models.IntegerField()
-    rep_p_papers = models.IntegerField()
-    rep_p_books = models.IntegerField()
-    rep_p_others = models.IntegerField()
     rep_n_articles_files = models.IntegerField()
     rep_n_processed = models.IntegerField()
     rep_n_duplicate = models.IntegerField()
     rep_n_files = models.IntegerField()
     rep_duration_seg = models.IntegerField()
     rep_size_file = models.IntegerField()
-    rep_name_file_merged = models.CharField(max_length=100)
     rep_date = models.DateField(auto_now_add=True)  # Permite agregar la fecha actual al registrar
 
     def __str__(self):
-        return f"Report {self.id} for Project {self.id_project.prj_name}"
+        return f"Reporte {self.id} para proyecto {self.id_project.prj_name}"
 
     def get_formated_duration(self):
         minu = int(self.rep_duration_seg // 60)
@@ -101,11 +111,19 @@ class Report(models.Model):
 
         return f"{minu:02}:{sec:02} seg"  # Tiempo formateado
 
-    def get_file_path(self):
-        if self.rep_name_file_merged:
-            return f'{settings.MEDIA_URL}/files/bib/{self.rep_name_file_merged}'
-        else:
-            return None
+    @staticmethod
+    def generate_timestamp(start_time):
+        import time
+        end_time = time.time()  # Tiempo de finalización de procesamiento
+        elapsed_time = end_time - start_time  # Calcular tiempo transcurrido en segundos
+
+        # self.rep_size_file += elapsed_time # Guardamos el tiempo de duración
+
+        minu = int(elapsed_time // 60)
+        sec = int(elapsed_time % 60)
+
+        return f"{minu:02}:{sec:02} seg"
+        # return self.get_formated_duration()
 
     def get_size(self):
         if self.rep_size_file:
@@ -117,17 +135,17 @@ class Report(models.Model):
     def get_count_types(self):
         data = {}
 
-        if self.rep_p_articles:
-            data['article'] = self.rep_p_articles
+        if self.articles:
+            data['article'] = self.articles
 
-        if self.rep_p_books:
-            data['book'] = self.rep_p_books
+        if self.books:
+            data['book'] = self.books
 
-        if self.rep_p_conferences:
-            data['conference'] = self.rep_p_conferences
+        if self.conferences:
+            data['conference'] = self.conferences
 
-        if self.rep_p_others:
-            data['others'] = self.rep_p_others
+        if self.others:
+            data['others'] = self.others
 
         return data
 
@@ -167,11 +185,69 @@ class ProjectFile:
 
     @staticmethod
     def read_bibtext(file_decode):
+        import time
+        start_time = time.time()  # Tiempo de inicio de procesamiento
         bib_database = bparser.loads(file_decode)
 
+        end_time = time.time()  # Tiempo de finalización de procesamiento
+        elapsed_time = end_time - start_time  # Calcular tiempo transcurrido en segundos
+
+        minu = int(elapsed_time // 60)
+        sec = int(elapsed_time % 60)
+
+        formatted_time = f"{minu:02}:{sec:02} seg"  # Tiempo formateado
+
+        print(formatted_time)
+
+        count = 0
         # Generador
         for entry in bib_database.entries:
             yield entry
+
+    def read_bibtext_with_regex(self, file_obj, limit=None):
+        """
+            En esta función analizamos el archivo con un regex para encontrar todos los ID's
+            y sus posiciones, así poder analizar hasta cierta cantidad específica que queramos mandar a mostrar
+            en las tablas independientemente del tamaño del archivo, acelerando este proceso
+        """
+
+        self.get_sheeps(file_obj)  # Obtenemos los ID's por el regex
+
+        # Ajustar el límite según la cantidad de entradas encontradas y el límite especificado
+        effective_limit = min(len(self.sheeps_ids), limit) if limit else len(self.sheeps_ids)
+
+        entries = []
+
+        for index in range(effective_limit):
+            match = self.sheeps_ids[index]
+            start_index = match.start()
+
+            # Determinar el final del segmento del archivo a procesar
+            if index < effective_limit - 1:
+                end_index = self.sheeps_ids[index + 1].start()
+            else:
+                print(limit, 'limite')
+                print(index, 'index')
+                print(len(self.sheeps_ids), 'ids')
+                if len(self.sheeps_ids) > limit and index == effective_limit - 1:
+                    end_index = self.sheeps_ids[index + 1].start()
+                else:
+                    end_index = None  # Última entrada, procesar hasta el final del archivo
+
+            section_to_process = file_obj[start_index:end_index]
+
+            bib_database = bparser.loads(section_to_process)
+
+            # Iterar sobre las entradas del archivo bib
+            for entry in bib_database.entries:
+                yield entry  # Generar y devolver cada entrada
+
+            entries.extend(bib_database.entries)
+
+            if limit and len(entries) >= limit:
+                break  # Terminar la función si se alcanza el límite de entradas
+
+        return entries
 
     def extract_data_file(self, file_decode):
         self.get_sheeps(file_decode)
@@ -282,9 +358,12 @@ class ProjectFile:
     def replace_slash(string):
         return string.replace('\n', ' ')
 
+    def get_id_regex(self, content):
+        return re.findall(r'@\w+\{\s*(\S.+),', content)
+
     def clean_black_sheep(self, entries, content):
         # Sacamos una lista completa de todos las entradas con regex
-        list_entry_id = re.findall(r'@\w+\{\s*(\S.+),', content)
+        list_entry_id = self.get_id_regex(content)
 
         # Hacemos una copia de lista extraída
         list_not_ID = list_entry_id.copy()
@@ -336,3 +415,53 @@ class ProjectFile:
     #
     #     return type_counts
     #
+
+
+
+
+# class ProjectFiles(models.Model):
+#     id_project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='files')
+#     pf_name_file = models.CharField(max_length=100)
+#     pf_p_articles = models.IntegerField()
+#     pf_p_conferences = models.IntegerField()
+#     pf_p_papers = models.IntegerField()
+#     pf_p_books = models.IntegerField()
+#     pf_p_others = models.IntegerField()
+#     pf_n_entries_file = models.IntegerField()
+
+# class Base(models.Model):
+#     name_file = models.CharField(max_length=100)
+#     articles = models.IntegerField()
+#     conferences = models.IntegerField()
+#     papers = models.IntegerField()
+#     books = models.IntegerField()
+#     others = models.IntegerField()
+# class ProjectFiles(models.Model):
+#     id_project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='files')
+#     pf_n_entries_file = models.IntegerField()
+# class Report(Base):
+#     id_project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='reports')
+#     rep_n_articles_files = models.IntegerField()
+#     rep_n_processed = models.IntegerField()
+#     rep_n_duplicate = models.IntegerField()
+#     rep_n_files = models.IntegerField()
+#     rep_duration_seg = models.IntegerField()
+#     rep_size_file = models.IntegerField()
+#     rep_date = models.DateField(auto_now_add=True)  # Permite agregar la fecha actual al registrar
+
+
+# class Report(models.Model):
+#     id_project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='reports')
+#     rep_name_file_merged = models.CharField(max_length=100)
+#     rep_p_articles = models.IntegerField()
+#     rep_p_conferences = models.IntegerField()
+#     rep_p_papers = models.IntegerField()
+#     rep_p_books = models.IntegerField()
+#     rep_p_others = models.IntegerField()
+#     rep_n_articles_files = models.IntegerField()
+#     rep_n_processed = models.IntegerField()
+#     rep_n_duplicate = models.IntegerField()
+#     rep_n_files = models.IntegerField()
+#     rep_duration_seg = models.IntegerField()
+#     rep_size_file = models.IntegerField()
+#     rep_date = models.DateField(auto_now_add=True)  # Permite agregar la fecha actual al registrar

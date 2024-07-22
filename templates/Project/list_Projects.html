@@ -58,7 +58,7 @@
                         {% for object in object_list %}
                         	<div class="item {% if object.prj_autosave == False %}item-{{ object.prj_autosave }}{% endif %}" data-project-id="{{ object.id }}">
 
-                                <a class="col1" href="{% url 'edit_project' object.id %}">
+                                <a class="col1" href="{% url 'manage_project' object.id %}">
                                     <span class="title-pj">{{ object.prj_name }}</span>
                                 </a>
 
@@ -88,7 +88,7 @@
 
                                             <div class="options">
                                                 <div class="dropdown-option">
-                                                    <a class="btn btn-bar btn-down {{ object.get_last_report.disabled }}" href="">
+                                                    <a class="btn btn-bar btn-down {{ object.get_last_report.disabled }}" href="{% url 'list_reports' object.id %}">
                                                         <i class="bi bi-clipboard2-data-fill"></i>
                                                         <span class="text">Ver reportes</span>
                                                     </a>
@@ -98,7 +98,7 @@
                                                     </a>
                                                 </div>
 
-                                                <a class="btn btn-download {{ object.get_last_report.disabled }}" href="{{ object.get_last_report.rep_name_file_merged }}">
+                                                <a class="btn btn-download {{ object.get_last_report.disabled }}" href="{{ object.get_last_report.name_file }}">
                                                     <i class="bi bi-file-earmark-arrow-down-fill"></i>
                                                     <span class="text">Descargar merged</span>
                                                 </a>
@@ -149,7 +149,6 @@
             </div>
 
         </div>
-    <div id="bodyAlertPlaceholder"></div>
     </div>
 {% endblock %}
 
@@ -261,11 +260,11 @@
         </div>
         </div>
     </div>
-
-
-
-
-
+    
+    
+    
+    
+    
 
 
     <!-- Modal PARA ELIMINAR UN PROYECTO --------------------------------------------------------->
@@ -295,7 +294,7 @@
     </div>
 
 
-    <!-- Modal PARA PROYECTOS AUTOGUARDADOS --------------------------------------------------------->
+    <!-- Modal PARA PROYECTOS recuperados --------------------------------------------------------->
 
     <div class="modal fade" id="modal-autosave" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
@@ -304,7 +303,7 @@
             <div class="modal-header">
 
                 <i class="bi bi-archive"></i>
-                <h1 class="modal-title fs-4" id="exampleModalLabel">Proyectos autoguardados</h1>
+                <h1 class="modal-title fs-4" id="exampleModalLabel">Proyectos recuperados</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 
             </div>
@@ -315,10 +314,10 @@
                     <img src="{% static 'img/utils/autosave.svg' %}" alt="Persona pensando">
                     <a href="https://www.freepik.es/vector-gratis/dibujado-mano-ilustracion-datos_49639856.htm">Imagen de freepik</a>
 
-                    <p>Tienes proyectos no guardados. Los puedes guardar dando click en el <strong>botón verde
+                    <p>Tienes proyectos recuperados. Los puedes guardar dando click en el <strong>botón verde
                         con el visto</strong> o si deseas eliminarlo: darle click en el <strong>botón rojo con un tachito de basura</strong>:</p>
 
-                    <p>Tienes proyectos no guardados. Para guardarlos, solo escoge de las opciones
+                    <p>Tienes proyectos recuperados. Para guardarlos, solo escoge de las opciones
                         si "<strong>guardar</strong>" o si deseas eliminarlo: presionar sobre "<strong>Eliminar</strong>".</p>
                 </div>
 
@@ -349,5 +348,6 @@
 
 {% block js %}
     <script src="{% static "js/menu.js" %}"></script>
+    <script src="{% static "js/utils.js" %}"></script>
     <script src="{% static "js/list_projects.js" %}"></script>
 {% endblock js %}

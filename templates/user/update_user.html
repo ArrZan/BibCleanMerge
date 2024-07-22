@@ -123,7 +123,7 @@
 								</div>
 								<div class="col">
 									<div class="input-group mb-3">
-										<a href="{% url 'password_change' %}" class="btn btn_primary col" >
+										<a href="{% url 'password_change' %}" class="btn btn_primary col">
 											<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"
 											     fill="currentColor" class="bi bi-person-fill-lock" viewBox="0 0 16 16">
 												<path d="M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0m-9 8c0 1 1 1 1 1h5v-1a2 2 0 0 1 .01-.2 4.49 4.49 0 0 1 1.534-3.693Q8.844 9.002 8 9c-5 0-6 3-6 4m7 0a1 1 0 0 1 1-1v-1a2 2 0 1 1 4 0v1a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1zm3-3a1 1 0 0 0-1 1v1h2v-1a1 1 0 0 0-1-1"/>
@@ -149,6 +149,23 @@
 									        aria-label="Close"></button>
 								</div>
 							{% endfor %}
+						</div>
+					{% endif %}
+					{% if form.errors %}
+						<div id="bodyAlertPlaceholder" class="fixed-button">
+							<div>
+								<div class="alert alert-danger alert-dismissible" role="alert">
+									{% for field, errors in form.errors.items %}
+										{% for error in errors %}
+											<div>
+												{{ error }}
+											</div>
+										{% endfor %}
+									{% endfor %}
+									<button type="button" class="btn-close" data-bs-dismiss="alert"
+									        aria-label="Close"></button>
+								</div>
+							</div>
 						</div>
 					{% endif %}
 
