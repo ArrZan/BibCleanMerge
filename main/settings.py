@@ -84,7 +84,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'BibCleanMerge',
-        'HOST': 'DESKTOP-PLOD91E',
+        'HOST': 'LAPTOPBRIGNER10',
         'PORT': '',
 
         'OPTIONS': {
@@ -202,8 +202,8 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 AXES_FAILURE_LIMIT = 5
-AXES_COOLOFF_TIME = timedelta(minutes=1)
-AXES_RESET_ON_SUCCESS = False
+AXES_COOLOFF_TIME = timedelta(minutes=5)
+AXES_RESET_ON_SUCCESS = True
 AXES_LOCKOUT_PARAMETERS = ['username']
 AXES_LOCKOUT_URL = '/accounts/registration/account_locked/' #redirige a una vista que se personalizo para mejor
 # comprencion del usuarip
