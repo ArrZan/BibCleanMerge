@@ -115,4 +115,6 @@ class UserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
 
 
 def account_locked(request):
-    return render(request, 'registration/account_locked.html')
+    title = "Cuenta Bloqueada"
+
+    return render(request, 'registration/account_locked.html', {'title': title})
