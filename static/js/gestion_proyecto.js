@@ -2,10 +2,11 @@
 
 const csrf = $d.querySelector('input[name="csrfmiddlewaretoken"]').value;
 // Doble clic en el título o descripción del proyecto
+const emptyFolder = $d.querySelectorAll('.img-folder');
 const spansProject = $d.querySelectorAll('.position-relative > span');
 const submitBtn = $d.getElementById('submit-btn'); // Botón submit del form project
 const cancelBtn = $d.querySelector('.data-container > form .btn_warning'); // Botón para cancelar del form project
-let titleProject = spansProject[0].textContent; // Titulo del proyecto
+let titleProject = spansProject[0].textContent; // Título del proyecto
 let textProject = spansProject[1].textContent; // Descripción del proyecto
 
 $d.addEventListener('DOMContentLoaded', ev => {
@@ -13,28 +14,30 @@ $d.addEventListener('DOMContentLoaded', ev => {
     const btnAddFile = $d.getElementById('fileInput');
 
     let listItems = $d.querySelectorAll('.list-item');
+    let contItem = listItems.length;
+
+    const tableVariables = $d.querySelector('.data-files table');
     let listVariablesSpan = $d.querySelectorAll('.data-files tbody .var-form');
     const headerList = $d.querySelector('.title-list');
 
 
-    btnAddFile.addEventListener('change', function () {
+    btnAddFile.addEventListener('change', event => {
+        const files = event.target.files;
 
-        // Función para validar la extensión de un archivo de imagen
+        addFiles(files, event.target.dataset.action);
+    });
 
-
-        // Obtiene el elemento <ul> con el ID 'fileList' donde se van a mostrar los archivos seleccionados
-        const fileList = $d.getElementById('fileList');
-        let formData = new FormData();
-
+    function addFiles(filesArray, url) {
         // Contador de archivos válidos
         let numArchivosValidos = 0;
+        let formData = new FormData();
 
         // Añadimos el csrf al formData
         formData.append('csrfmiddlewaretoken', csrf);
 
         // Agregar cada archivo seleccionado al formData
-        for (let i = 0; i < this.files.length; i++) {
-            const file = this.files[i]; // Obtiene el archivo actual en el bucle
+        for (let i = 0; i < filesArray.length; i++) {
+            const file = filesArray[i]; // Obtiene el archivo actual en el bucle
             const fileName = file.name;
             const extPermitidas = /\.(bib)$/i; // extensiones permitidas
 
@@ -49,9 +52,8 @@ $d.addEventListener('DOMContentLoaded', ev => {
         }
 
         if (numArchivosValidos > 0) {
-
             blur_active(); // Activamos blur de carga
-            fetch(this.dataset.action,{
+            fetch(url,{
                     method: 'POST',
                     body: formData,
                 })
@@ -59,8 +61,24 @@ $d.addEventListener('DOMContentLoaded', ev => {
                 .then(data => {
                     blur_inactive()
                     if (data.message) {
+                        // Obtiene el elemento <ul> con el ID 'fileList' donde se van a mostrar los archivos seleccionados
+                        const fileList = $d.getElementById('fileList');
+
                         addItems(fileList, data.entries);
                         this.value = "";
+
+                        if (contItem === 0) {
+                            tableVariables.classList.add('div-hidden');
+
+                            emptyFolder[0].classList.remove('div-hidden');
+                            emptyFolder[1].classList.remove('div-hidden');
+                        } else {
+                            tableVariables.classList.remove('div-hidden');
+
+                            emptyFolder[0].classList.add('div-hidden');
+                            emptyFolder[1].classList.add('div-hidden');
+                        }
+
                     }  else if (data.error) {
                         // Desactivamos pantalla de carga
                         appendAlert(data.error, "danger");
@@ -69,8 +87,23 @@ $d.addEventListener('DOMContentLoaded', ev => {
             .catch(error => {
                 console.log('Error: ', error);
             })
+
         }
-    });
+
+    }
+
+    function verificateFiles() {
+
+        if (contItem > 0) {
+            emptyFolder[0].classList.add('div-hidden');
+            emptyFolder[1].classList.add('div-hidden');
+            tableVariables.classList.remove('div-hidden');
+        } else {
+            emptyFolder[0].classList.remove('div-hidden');
+            emptyFolder[1].classList.remove('div-hidden');
+            tableVariables.classList.add('div-hidden');
+        }
+    }
 
 
     function addItems(fileList, data) {
@@ -89,8 +122,6 @@ $d.addEventListener('DOMContentLoaded', ev => {
 
             // Asignamos la nueva url
             let newUrl = currentUrl.replace(/\/\d+\/$/, `/${item.key}/`);
-            console.log(newUrl);
-
 
             const fileNameCont = $d.createElement('div');
             fileNameCont.classList.add('list-item-title');
@@ -124,7 +155,8 @@ $d.addEventListener('DOMContentLoaded', ev => {
             addVariable(item.key, item.name);
             listItemsActions(listItem);
 
-
+            contItem++;
+            console.log(contItem);
         })
     }
 
@@ -275,6 +307,10 @@ $d.addEventListener('DOMContentLoaded', ev => {
                 .then(response=> response.json())
                 .then(data => {
                     if (data.message) {
+                        contItem--;
+
+                        // Verificamos si hay archivos para mostrar la imagen de no archivos
+                        verificateFiles();
                         appendAlert(data.message,"success", 'bodyAlertPlaceholder');
                     }  else if (data.error) {
                     // Desactivamos pantalla de carga
@@ -499,12 +535,17 @@ $d.addEventListener('DOMContentLoaded', ev => {
                 })
                 .then(response=> response.json())
                 .then(data => {
+
                     if (data.message) {
                         titleProject = spansProject[0].textContent;
                         textProject = spansProject[1].textContent;
 
                         $d.querySelector('.header-c .he-title h2').textContent = titleProject;
                         deactiveBtn();
+                    }
+
+                    if (data.error) {
+                        appendAlert('Ya existe un proyecto con este nombre.', 'danger', 'bodyAlertPlaceholder');
                     }
 
                     if (data.errors) {
@@ -521,6 +562,75 @@ $d.addEventListener('DOMContentLoaded', ev => {
             })
         }
     })
+
+    const btnProcess = $d.getElementById('btn-process');
+    // Envío de solicitud al servidor para procesar los archivos desde gestión de proyectos
+    btnProcess.addEventListener('click', function(eve) {
+        eve.preventDefault();
+        const href = btnProcess.getAttribute('href');
+        console.log(href)
+
+        if (contItem > 0) {
+            blur_active();
+            fetch(href,{
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrf,
+                    },
+                })
+                .then(response=> response.json())
+                .then(data => {
+                    if (data.redirect_url) {
+                        // Reenviar a la ruta de reportes con los datos del servidor, así mismo,
+                        // mandarle una descarga automática del archivo merged.
+
+                        // console.log(data.redirect_url)
+                        window.location.href = data.redirect_url;
+                    } else if (data.error) {
+                        // Desactivamos pantalla de carga
+                        blur_inactive();
+                        console.log(data.error_message)
+                        appendAlert(data.error, "danger");
+                    }
+                })
+            .catch(error => {
+                console.log('Error: ', error);
+            })
+
+        } else {
+            appendAlert('No hay archivos subidos!', 'warning', 'bodyAlertPlaceholder')
+        }
+    })
+
+    // LÓGICA SOLTAR ARCHIVOS EN LA ZONA DE ARRASTRE ----------------------------------------------------------
+
+    const dropZone = $d.getElementById('drop-zone');
+
+    // Eventos de arrastre y soltar en la zona de arrastre
+    dropZone.addEventListener('dragover', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        dropZone.classList.add('is-active');
+    });
+
+    // Eventos de salir de la zona de arrastre
+    dropZone.addEventListener('dragleave', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        dropZone.classList.remove('is-active');
+    });
+
+    // Eventos de soltar el archivo en la zona de arrastre
+    dropZone.addEventListener('drop', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        dropZone.classList.remove('is-active');
+
+        const filesDropped = event.dataTransfer.files;
+        addFiles(filesDropped, event.target.dataset.action);
+
+    });
 
 })
 

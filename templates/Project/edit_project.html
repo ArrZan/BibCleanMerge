@@ -30,14 +30,14 @@
             <div class="col d-flex justify-content-end align-items-center btn-float">
                 <button class="btn btn_primary me-2 col-auto fw-bold"
                     onclick="document.getElementById('fileInput').click()">
-                    <img src="{% static 'img/utils/plus.svg' %}" alt="+">
+                    <i class="bi bi-plus"></i>
                     <div class="text-bt">
                         Añadir Archivo
                     </div>
                     {% csrf_token %}
                     <input data-action="{% url 'add_files_project' object.id %}" id="fileInput" type="file" accept=".bib" hidden multiple />
                 </button>
-                <a class="btn btn_warning col-auto fw-bold" href="reporte.html">
+                <a class="btn btn_warning col-auto fw-bold" id="btn-process" href="{% url 'process' object.id %}">
                     <i class="bi bi-stars"></i>
                     <div class="text-bt">
                         Procesar
@@ -58,27 +58,35 @@
                     <button class="btn btn_primary" style="display: none;"><i class="bi bi-chevron-down"></i></button>
                 </div>
 
+                <div class="modal-body scroll-styled" id="drop-zone">
+                    <div class="blur"><p data-action="{% url 'add_files_project' object.id %}">Arrastre archivos aquí</p></div>
 
-                <ul id="fileList" class="list-group p-2 scroll-styled" data-action-delete="{% url 'delete_projectfiles' 1 %}" >
-                    {% for project_file in project_files %}
-                        <li class="list-item" data-file-id="{{ project_file.id }}">
-                            <div class="list-item-title">
-                                <h5>{{ project_file.name_file }}</h5>
-                            </div>
-                            <div class="list-item-delete">
-                                <button class="btn btn_primary"><i class="bi bi-x"></i></button>
-                                <div class="box-dialog">
-                                    <span>Deseas borrar?</span>
-                                    <div class="box-options">
-                                        <button data-action="{% url 'delete_projectfiles' project_file.id %}" class="btn btn_primary">Si</button>
-                                        <button class="btn btn_primary">No</button>
+                    <ul id="fileList" class="list-group p-2 scroll-styled" data-action-delete="{% url 'delete_projectfiles' 1 %}" >
+                        {% for project_file in project_files %}
+                            <li class="list-item" data-file-id="{{ project_file.id }}">
+                                <div class="list-item-title">
+                                    <h5>{{ project_file.name_file }}</h5>
+                                </div>
+                                <div class="list-item-delete">
+                                    <button class="btn btn_primary"><i class="bi bi-x"></i></button>
+                                    <div class="box-dialog">
+                                        <span>Deseas borrar?</span>
+                                        <div class="box-options">
+                                            <button data-action="{% url 'delete_projectfiles' project_file.id %}" class="btn btn_primary">Si</button>
+                                            <button class="btn btn_primary">No</button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </li>
-                    {% endfor %}
-                
-                </ul>
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="img-folder {% if project_files %}div-hidden{% endif %}">
+                        <img src="{% static 'img/utils/empty_folder.svg' %}" alt="Carpeta vacía">
+                        <p>Sin archivos</p>
+                    </div>
+
+                </div>
 
             </div>
 
@@ -111,7 +119,8 @@
                 
                 <div class="data-files mt-2">
                     <h5>Archivos</h5>
-                    <table class="table">
+
+                    <table class="table {% if not project_files %}div-hidden{% endif %}">
 
                       <thead>
                         <tr>
@@ -122,7 +131,7 @@
 
                       <tbody>
                       {% for file in project_files %}
-                      	<tr>
+                        <tr>
                           <td>{{ file.name_file }}</td>
                           <td class="var-form tr-{{ file.id }}">
                               <span>{% if file.search_criteria == 'N/A' or file.search_criteria == '' %}N/A{% else %}{{ file.search_criteria }}{% endif %}</span>
@@ -149,6 +158,12 @@
 
                       </tbody>
                     </table>
+
+                    <div class="img-folder {% if project_files %}div-hidden{% endif %}">
+                        <img src="{% static 'img/utils/empty_folder.svg' %}" alt="Carpeta vacía">
+                        <p>Sin archivos</p>
+                    </div>
+
                 </div>
 
             </div>
@@ -247,14 +262,29 @@
 
             <div class="modal-body">
 
-                    
                 <p>Bienvenido a la mini guía para <strong>editar datos del proyecto</strong>.</p>
-                <p>Si quieres cambiar el título, descripción o alguna variables de un archivo, solo <strong>haz doble click
-                    en el texto:</strong></p>
+                <div class="info-autosave">
+                    <p>Si quieres cambiar el título, descripción o alguna variable de un archivo, solo
+                        <strong>haz doble click en el texto:</strong></p>
+                    <p>Si quieres cambiar el título, descripción o alguna variable de un archivo, solo
+                        <strong>mantén presionado en el texto:</strong></p>
+                </div>
+
+
                 <div class="info-guide">
-                    <img src="{% static 'img/utils/form_guide.png' %}" alt="Guía para editar proyecto.">
-                    <p class="my-2">Se te habilitará para poder editar tal como se muestra:</p>
-                    <img src="{% static 'img/utils/form_guide_2.png' %}" alt="Guía para editar proyecto habilitado.">
+
+                    <div class="desktop">
+                        <img src="{% static 'img/utils/form_guide.png' %}" alt="Guía para editar proyecto.">
+                        <p class="my-2">Se te habilitará para poder editar tal como se muestra:</p>
+                        <img src="{% static 'img/utils/form_guide_2.png' %}" alt="Guía para editar proyecto habilitado.">
+                    </div>
+
+                    <div class="cell">
+                        <img src="{% static 'img/utils/form_guide.png' %}" alt="Guía para editar proyecto.">
+                        <p class="my-2">Se te habilitará para poder editar tal como se muestra:</p>
+                        <img src="{% static 'img/utils/form_guide_2.png' %}" alt="Guía para editar proyecto habilitado.">
+                    </div>
+
                 </div>
 
 

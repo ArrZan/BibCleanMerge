@@ -85,7 +85,33 @@ function createProject() {
     document.getElementById('submit-btn').click();
 }
 
+$d.addEventListener('submit', eve => {
+        eve.preventDefault();
 
+        const formData = new FormData(eve.target);
+
+        fetch(eve.target.action,{
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrf,
+                 },
+                body: formData,
+            })
+            .then(response=> response.json())
+            .then(data => {
+                console.log(data)
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                }
+
+                if (data.error) {
+                    appendAlert(data.error,"danger", 'modalAlertPlaceholder2');
+                }
+            })
+        .catch(error => {
+            console.log('Error: ', error);
+        })
+    })
 
 
 // ELIMINAR ALGÚN PROYECTO -------------------------------------------------------------------------------------------------------
@@ -164,6 +190,9 @@ function saveProject(element) {
 
             item.querySelector('.option-info').remove();
             item.classList.remove('item-False');
+
+            // Removemos el disabled del col1
+            item.querySelector('.col1.disabled').classList.remove('disabled');
 
             appendAlert(data.message, "success", 'bodyAlertPlaceholder');
         } else if (data.error) {

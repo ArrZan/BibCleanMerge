@@ -49,7 +49,7 @@
                         {% for report in reports %}
                         	<div class="item" data-project-id="{{ report.id }}">
 
-                                <a class="col1" href="#" style="cursor: default">
+                                <a class="col1 report-col" href="#" style="cursor: default">
                                     <span class="title-pj">Reporte {{ forloop.counter }}</span>
                                 </a>
 
@@ -75,7 +75,7 @@
                                                     <span class="text">Ver reporte</span>
                                                 </a>
 
-                                                <a class="btn btn-download" href="{{ report.name_file }}">
+                                                <a class="btn btn-download" href="{{ report.get_file_path }}">
                                                     <i class="bi bi-file-earmark-arrow-down-fill"></i>
                                                     <span class="text">Descargar merged</span>
                                                 </a>

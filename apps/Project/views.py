@@ -6,7 +6,7 @@ import itertools
 
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.http import JsonResponse, Http404, HttpResponseRedirect
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
@@ -77,7 +77,14 @@ class CreateProjectView(LoginRequiredMixin, CreateView):
         form.instance.prj_description = self.request.POST['prj_description'] if self.request.POST['prj_description'] else 'Sin descripción.'
         form.instance.prj_autosave = True  # Esto es para indicar que el usuario si guardó el proyecto
 
-        return super().form_valid(form)
+        try:
+            response = super().form_valid(form)
+
+            # Devolvemos la URL de redirección como parte de la respuesta JSON
+            redirect_url = self.get_success_url()
+            return JsonResponse({'redirect_url': redirect_url})
+        except IntegrityError:
+            return JsonResponse({'error': 'Ya existe un proyecto con este nombre.'})
 
     def form_invalid(self, form):
         # INTENTAR ENVIAR LOS ERRORES POR EL TÍTULO REPETIDO
@@ -120,24 +127,29 @@ class UpdateProjectView(LoginRequiredMixin, AccessOwnerMixin, UpdateView):
     form_class = ProjectForm
 
     def form_valid(self, form):
-        project = self.get_object()
 
-        for field, value in form.cleaned_data.items():
-            # Obtenemos el valor sin alterar del campo iterado
-            current_value = getattr(project, field)
-            # Consultamos si hubo algún cambio
-            if value != current_value:
-                # __dict__ nos devuelve un diccionario de los atributos de la instancia project,
-                # entonces modificamos el campo para actualizarlo
-                project.__dict__[field] = value
+        try:
+            project = self.get_object()
 
-        project.save()
+            for field, value in form.cleaned_data.items():
+                # Obtenemos el valor sin alterar del campo iterado
+                current_value = getattr(project, field)
+                # Consultamos si hubo algún cambio
+                if value != current_value:
+                    # __dict__ nos devuelve un diccionario de los atributos de la instancia project,
+                    # entonces modificamos el campo para actualizarlo
+                    project.__dict__[field] = value
 
-        return JsonResponse({'message': 'Proyecto actualizado.'})
+            project.save()
+
+            return JsonResponse({'message': 'Proyecto actualizado.'})
+        except IntegrityError:
+            return JsonResponse({'error': 'Nombre ya en uso.'})
 
     def form_invalid(self, form):
         # En caso de errores de validación, devolvemos un JSON con los errores
         errors = form.errors.as_json()
+        print(errors)
         return JsonResponse({'errors': json.loads(errors)})
 
 
@@ -172,7 +184,8 @@ class ManageProjectView(LoginRequiredMixin, AccessOwnerMixin, DetailView):
             # Modificamos el nombre del archivo utilizando get_name_split()
             project_file['name_file'] = project_file_obj.get_name_split()
 
-            all_entries.append(ProjectFilesEntries.objects.filter(id_project_files_id=project_file['id']))
+            # Llamamos nomás los 30 primeros registros
+            all_entries.append(ProjectFilesEntries.objects.filter(id_project_files_id=project_file['id']).order_by('id')[:30])
 
         context['project_files'] = project_files
         context['all_entries'] = all_entries
@@ -224,6 +237,8 @@ class DeleteProjectView(LoginRequiredMixin, AccessOwnerMixin, DeleteView):
             # Obtenemos el objeto a eliminar
             project = self.get_object()
 
+            # ELIMINAR LOS ARCHIVOS QUE SE GUARDAN DE LOS PROJECT FILES
+
             # Eliminamos el objeto
             project.delete()
 
@@ -269,7 +284,6 @@ class ListReportsView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         # Obtenemos el proyecto
-        print(self.kwargs['pk'])
         project = get_object_or_404(Project, id=self.kwargs['pk'])
         # Filtramos los reportes de este proyecto
         return Report.objects.filter(id_project=project)
@@ -312,7 +326,6 @@ class AddFileView(LoginRequiredMixin, View):
 
                     name_date = datetime.now().strftime("%H%M%S")
                     fileName = f'({self.request.user.id})_{name_date}___{file.name}'
-                    print(fileName.split('___'))
 
                     # Guardar el archivo en 'media/files/bib'
                     file_path = os.path.join(settings.MEDIA_ROOT, 'files', 'bib', fileName)
@@ -403,40 +416,75 @@ class ProcesamientoView(LoginRequiredMixin, View):
 
             # Si existen archivos...
             if files_bib:
+
                 # Nombre y dirección de guardado del archivo
                 name_date = datetime.now().strftime("%Y%m%d%H%M%S")
                 name_File = f'merged_{name_date}.bib'
                 file_Path = os.path.join(settings.MEDIA_BIB, name_File)
+
+                # Crear el proyecto con un título y descripción predeterminados
+                new_project = Project.objects.create(
+                    id_usuario=request.user,
+                    prj_name=f'Proyecto recuperado [{name_date}]',
+                    prj_description='Sin descripción.',
+                )
 
                 purge = PurgeData()
 
                 for file in files_bib:
 
                     obj_entries = ProjectFile()
+
                     file_decode = obj_entries.decode_file(file)
+
+                    name_date2 = datetime.now().strftime("%H%M%S")
+                    fileName = f'({request.user.id})_{name_date2}___{file.name}'
+
+                    # Guardar el archivo en 'media/files/bib'
+                    file_path = os.path.join(settings.MEDIA_ROOT, 'files', 'bib', fileName)
+                    with open(file_path, 'wb') as destination:
+                        for chunk in file.chunks():
+                            destination.write(chunk)
+
+                    newFile = ProjectFiles.objects.create(
+                        id_project=new_project,
+                        name_file=fileName,
+                    )
 
                     obj_entries.extract_data_file(file_decode)
                     purge.black_sheeps_ids += obj_entries.black_sheeps_ids
 
-                    obj_entries.unificar_entradas(file_decode, purge)
+                    # obj_entries.unificar_entradas(file_decode, purge)
 
-                    # for entry in obj_entries.read_bibtext(file_decode):
-                    #     purge = PurgeData()
-                    #     # Obtengo el tipo de entrada y lo acumulo en el diccionario (conteo de tipos de entrada)
-                    #     type_entry = obj_entries.get_type_entry(entry)
-                    #
-                    #     if type_entry not in count_entry_type_all:
-                    #         count_entry_type_all[type_entry] = 1
-                    #     else:
-                    #         count_entry_type_all[type_entry] += 1
-                    #
-                    #     formatedEntry = purge.format_bibtext_entry(entry, contArt)
-                    #
-                    #     # escribir todas las entradas formateadas de una vez al final
-                    #     with open(file_Path, 'a', encoding="utf8") as f:
-                    #         f.write(formatedEntry)
-                    #
-                    #     contArt += 1
+                    for entry in obj_entries.read_bibtext(file_decode):
+                        # purge = PurgeData()
+                        # Obtengo el tipo de entrada y lo acumulo en el diccionario (conteo de tipos de entrada)
+                        type_entry = obj_entries.get_type_entry(entry)
+
+                        if type_entry not in purge.count_entry_type_all:
+                            purge.count_entry_type_all[type_entry] = 1
+                        else:
+                            purge.count_entry_type_all[type_entry] += 1
+
+                        formatedEntry = purge.format_bibtext_entry(entry)
+
+                        # escribir todas las entradas formateadas de una vez al final
+                        with open(file_Path, 'a', encoding="utf8") as f:
+                            f.write(formatedEntry)
+
+                        newEntrie = ProjectFilesEntries.objects.create(
+                            id_project_files=newFile,
+                            pfe_title=entry.get('title', 'N/A'),
+                            pfe_authors=entry.get('author', 'N/A'),
+                            pfe_year=entry.get('year', 'N/A'),
+                            pfe_keywords=entry.get('keywords', 'N/A'),
+                            pfe_journal=entry.get('journal', 'N/A'),
+                            pfe_volume=entry.get('volume', 'N/A'),
+                            pfe_number=entry.get('number', 'N/A'),
+                            pfe_pages=entry.get('pages', 'N/A'),
+                            pfe_doi=entry.get('doi', 'N/A'),
+                        )
+                        print(purge.contArt - 1)
 
                     print("*" * 50)
                     print("Obejas: ", obj_entries.num_sheeps)
@@ -496,16 +544,6 @@ class ProcesamientoView(LoginRequiredMixin, View):
                     'elapsed_time': formatted_time,
                 }
 
-                # Guardar count_entry_type en la sesión
-                # request.session['dataSet'] = data
-
-                # Crear el proyecto con un título y descripción predeterminados
-                new_project = Project.objects.create(
-                    id_usuario=request.user,
-                    prj_name=f'Proyecto recuperado [{name_date}]',
-                    prj_description='Sin descripción.',
-                )
-
                 # Crear el reporte asociado a este proyecto
                 newReport = Report.objects.create(
                     id_project=new_project,
@@ -549,4 +587,161 @@ class ProcesamientoView(LoginRequiredMixin, View):
             return JsonResponse({'error': 'Ocurrió un error en el servidor!',
                                  'error_message': str(e)}, status=500)
 
+
+
+"""
+---------------------------------------------------------------------- Procesamiento rápido
+"""
+
+
+class ProcesamientoView2(LoginRequiredMixin, View):
+    model = Project
+
+    def post(self, request, *args, **kwargs):
+        project_id = kwargs['pk']
+        try:
+            project = Project.objects.get(pk=project_id)
+
+            # Recogemos los archivos guardados
+            projectFiles = project.files.all()
+
+            start_time = time.time()  # Tiempo de inicio de procesamiento
+
+            # Nombre y dirección de guardado del archivo
+            name_date = datetime.now().strftime("%Y%m%d%H%M%S")
+            name_File = f'merged_{name_date}.bib'
+            file_Path = os.path.join(settings.MEDIA_BIB, name_File)
+
+            purge = PurgeData()
+            print("Antes de sumar", len(purge.black_sheeps_ids))
+            print("Antes de sumar", purge.black_sheeps_ids)
+
+            print("Cantidad de archivos", len(projectFiles))
+
+            for projectFile in projectFiles:
+                projectFile_path = os.path.join(settings.MEDIA_BIB, projectFile.name_file)
+                # Abrir el archivo en modo lectura
+                with open(projectFile_path, 'r', encoding='utf-8') as file:
+                    # Leer el contenido del archivo
+                    file_content = file.read()
+
+                obj_entries = ProjectFile()
+
+                # file_decode = obj_entries.decode_file(file)
+
+                obj_entries.extract_data_file(file_content)
+                print("Antes de sumar", len(purge.black_sheeps_ids))
+                purge.black_sheeps_ids += obj_entries.black_sheeps_ids
+                print("Depsues de sumar", len(purge.black_sheeps_ids))
+
+                for entry in obj_entries.read_bibtext(file_content):
+                    # Obtengo el tipo de entrada y lo acumulo en el diccionario (conteo de tipos de entrada)
+                    type_entry = obj_entries.get_type_entry(entry)
+
+                    if type_entry not in purge.count_entry_type_all:
+                        purge.count_entry_type_all[type_entry] = 1
+                    else:
+                        purge.count_entry_type_all[type_entry] += 1
+
+                    formatedEntry = purge.format_bibtext_entry(entry)
+
+                    # escribir todas las entradas formateadas de una vez al final
+                    with open(file_Path, 'a', encoding="utf8") as f:
+                        f.write(formatedEntry)
+
+                print("*" * 50)
+                print("Obejas: ", obj_entries.num_sheeps)
+                print("Obejas blancas: ", obj_entries.num_white_sheeps)
+                print("Obejas negras: ", obj_entries.num_black_sheeps)
+
+                # if obj_entries.num_black_sheeps > 0:
+                #     filePath_black = os.path.join(settings.MEDIA_BIB, f'BSHEEP_{name_date}_{file.name}.txt')
+                #     with open(filePath_black, 'w') as f:
+                #         for id_ in obj_entries.black_sheeps_ids:
+                #             f.write(id_ + "\n")
+
+                purge.sheeps_ids += obj_entries.num_sheeps
+                purge.white_sheeps_ids += obj_entries.num_white_sheeps
+
+            print("*" * 50)
+            print("*" * 50)
+            print("*" * 50)
+            print("Conteo GENERAL")
+            # Esto es para TESTING (BORRAR)
+            for entry_type, count in purge.count_entry_type_all.items():
+                print(f'{entry_type}: {count}')
+
+            print("*" * 50)
+            print("Obejas: ", purge.sheeps_ids)
+            print("Obejas blancas: ", purge.white_sheeps_ids)
+            print("Obejas negras: ", len(purge.black_sheeps_ids))
+            print("*" * 50)
+            print("Entradas únicas: ")
+
+            for entry, value in purge.entradas_unicas.items():
+                with open(file_Path, 'a', encoding="utf8") as f:
+                    f.write(f'{entry}: {value}\n')
+
+            size_File_bytes = os.path.getsize(file_Path)  # Tamaño de archivo
+            size_File = size_File_bytes / (1024 * 1024)  # Tamaño de archivo en MB
+
+            end_time = time.time()  # Tiempo de finalización de procesamiento
+            elapsed_time = end_time - start_time  # Calcular tiempo transcurrido en segundos
+
+            # minu = int(elapsed_time // 60)
+            # sec = int(elapsed_time % 60)
+
+            # formatted_time = f"{minu:02}:{sec:02} seg"  # Tiempo formateado
+
+            # data = {
+            #     'count_typeEnt': purge.count_entry_type_all,
+            #     'count_entries': purge.sheeps_ids,
+            #     'count_process': purge.contArt - 1,
+            #     'count_duplicated': len(purge.black_sheeps_ids),
+            #     'count_files': len(projectFiles),
+            #     'name_file': name_File,
+            #     # 'size_file': f'000000 MB',
+            #     # 'url_file': f'0000000',
+            #     'size_file': f'{size_File:.2f} MB',
+            #     'url_file': f'{settings.MEDIA_URL}/files/bib/{name_File}',
+            #     'elapsed_time': formatted_time,
+            # }
+
+            print('Cantidad de n dup: ', len(purge.black_sheeps_ids))
+            # Crear el reporte asociado a este proyecto
+            newReport = Report.objects.create(
+                id_project=project,
+                name_file=name_File,
+                articles=purge.count_entry_type_all.get('article', 0),
+                conferences=purge.count_entry_type_all.get('conference', 0),
+                papers=purge.count_entry_type_all.get('paper', 0),
+                books=purge.count_entry_type_all.get('book', 0),
+                others=purge.count_entry_type_all.get('others', 0),
+                rep_n_articles_files=purge.sheeps_ids,
+                rep_n_processed=purge.contArt - 1,
+                rep_n_duplicate=len(purge.black_sheeps_ids),
+                rep_duration_seg=elapsed_time,
+                rep_n_files=len(projectFiles),
+                rep_size_file=size_File_bytes,
+            )
+
+            # Redirigimos a la vista de detalle del reporte
+            return JsonResponse({'redirect_url': reverse('report_detail', kwargs={'pk': newReport.id})})
+
+        except Exception as e:
+            # Depuración
+            tipo_excepcion, valor_excepcion, tb = sys.exc_info()
+            print(f"Tipo de excepción: {tipo_excepcion}")
+            print(f"Valor de la excepción: {valor_excepcion}")
+            print("Traceback:")
+            traceback_details = {
+                'filename': tb.tb_frame.f_code.co_filename,
+                'line': tb.tb_lineno,
+                'name': tb.tb_frame.f_code.co_name,
+            }
+            for name, value in traceback_details.items():
+                print(f"  {name}: {value}")
+
+            return JsonResponse({'error': 'Ocurrió un error en el servidor!',
+                                 'error_message': str(e)}, status=500)
 

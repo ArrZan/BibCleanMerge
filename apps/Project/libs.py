@@ -1,65 +1,68 @@
-# Abreviatura de palabras keywords
-kw = 'keywords'
-kwp = 'keywords-plus'
-kwa = 'author_keywords'
-
 
 class PurgeData:
-    entradas_unicas = {}
+    def __init__(self):
+        self.contArt = 1  # Contador de los entry's
+        self.entradas_unicas = {}
 
-    sheeps_ids = 0  # contador de los entry por regex
-    white_sheeps_ids = 0  # contador de los entry por regex
-    black_sheeps_ids = []  # lista de todas las obejas negras
-    contArt = 1  # Contador de los entry's
-    count_entry_type_all = {}
+        self.sheeps_ids = 0  # contador de los entry por regex
+        self.white_sheeps_ids = 0  # contador de los entry por regex
+        self.black_sheeps_ids = []  # lista de todas las obejas negras
+        self.contArt = 1  # Contador de los entry's
+        self.count_entry_type_all = {}
 
-    def format_bibtext_entry(self, entry, cont):
+    def format_bibtext_entry(self, entry):
         tempKeys = {}  # Diccionario de los keywords por cada iteración del entry
 
-        # field, format, wrap or not
-        field_order = [(u'author', '{{{0}}},\n', True),
-                       (u'title', '{{{0}}},\n', True),
-                       (u'journal', '{{{0}}},\n', True),
-                       (u'volume', '{{{0}}},\n', True),
-                       (u'number', '{{{0}}},\n', True),
-                       (u'pages', '{{{0}}},\n', True),
-                       (u'year', '{{{0}}},\n', True),
-                       (u'doi', '{{{0}}},\n', False)]
+        # Definir los tipos de keywords si no están definidos
+        kw = 'keywords'
+        kwp = 'keywords-plus'
+        kwa = 'author_keywords'
 
-        # Creamos un conjunto con todos los key del entry
+        # Definir el orden de los campos y el formato
+        field_order = [
+            ('author', '{{{0}}},\n', True),
+            ('title', '{{{{"{0}"}}}},\n', True),
+            ('journal', '{{{0}}},\n', True),
+            ('volume', '{{{0}}},\n', True),
+            ('number', '{{{0}}},\n', True),
+            ('pages', '{{{0}}},\n', True),
+            ('year', '{{{0}}},\n', True),
+            ('doi', '{{{0}}},\n', False)
+        ]
+
+        # Crear un conjunto con todos los keys del entry
         keys = set(entry.keys())
 
-        # Se sacan los campos extras entre la diferencia de las keys y los key del field_order
+        # Sacar los campos extras entre la diferencia de las keys y los key del field_order
         extra_fields = keys.difference([f[0] for f in field_order])
 
-        # No necesitamos esto en los extras
-        extra_fields.remove('ENTRYTYPE')
-        extra_fields.remove('ID')
+        # Remover 'ENTRYTYPE' y 'ID' de los extras si están presentes
+        if 'ENTRYTYPE' in extra_fields:
+            extra_fields.remove('ENTRYTYPE')
+        if 'ID' in extra_fields:
+            extra_fields.remove('ID')
 
-        # Construimos la cadena de entrada y añadimos el código ordenado por año
-        # ENTRYTYPE
+        # Construir la cadena de entrada
         s = '@{type}{{{id},\ncode={{{code}}},\n\n'.format(type=entry['ENTRYTYPE'],
-                                                          id=entry['ID'], code=cont)
+                                                          id=entry['ID'], code=self.contArt)
 
         for field, fmt, wrap in field_order:
             if field in entry:
                 # Este código comentado era para añadir un contador al título,
                 # como ya lo pusimos en código, comento esto.
                 if field == 'title':
-                    s += self.union(field, '{0} {1}'.format(cont, entry[field]))
+                    s += self.union(field, '{0} {1}'.format(self.contArt, entry[field]))
                 else:
-                    s1 = '{0}='.format(field)
-                    s2 = fmt.format(entry[field])
-                    s3 = '{0}{1}'.format(s1, s2)
-                    s += s3 + '\n'
+                    s += '{0}={1}'.format(field, fmt.format(entry[field]))
 
+        # Manejar tipos de keywords
         keyword = 0
         keywords_plus = 0
         author_keywords = 0
 
         # Aquí almacenamos todos los valores de los campos de un entry
         for field in extra_fields:
-            # Manejamos únicamente minúsculas
+            # Convertir field a minúsculas
             field = field.lower()
 
             # Si el campo está en el entry
@@ -79,12 +82,11 @@ class PurgeData:
 
                     tempKeys[field] = entry[field]
 
-        # Si no existe ningún tipo de keyword, entonces se crean los 3 campos
+        # Agregar campos de keywords si no existen
         if (keyword + keywords_plus + author_keywords) == 0:
-            s += self.union(kw, " ")  # Keywords
-            s += self.union(kwp, " ")  # keywords-plus
-            s += self.union(kwa, " ")  # author_keywords
-
+            s += self.union(kw, " ")
+            s += self.union(kwp, " ")
+            s += self.union(kwa, " ")
         elif keyword == 0 and keywords_plus == 0 and author_keywords == 1:
             s += self.union(kw, " ")
             s += self.union(kwp, tempKeys[kwa])
@@ -121,6 +123,9 @@ class PurgeData:
             s += self.union(kwa, entry[kwa])
 
         s += '\n}\n\n'
+
+        self.contArt += 1
+
         return s
 
     @staticmethod

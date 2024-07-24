@@ -2,6 +2,13 @@
     background-color: #E5E8ED;
 }
 
+img {
+    -moz-user-select: none; /* Para navegadores Firefox */
+    -webkit-user-drag: none; /* Para navegadores WebKit como Chrome y Safari */
+    -webkit-user-select: none; /* Para navegadores WebKit */
+    -ms-user-select: none; /* Para Internet Explorer y Edge */
+}
+
 .content {
     padding: 20px;
     height: 100%;
@@ -222,6 +229,47 @@ textarea,
     box-shadow: rgba(0, 0, 0, 0.19) 0 10px 20px, rgba(0, 0, 0, 0.23) 0 6px 6px;
 }
 
+/* DROP FILE --------------------- */
+
+#drop-zone {
+    position: relative;
+}
+
+
+#drop-zone .blur {
+    z-index: 1;
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 50px;
+    background: rgba(179, 192, 204, .9);
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility .3s, opacity .3s;
+}
+
+#drop-zone.is-active .blur{
+    visibility: visible;
+    opacity: 1;
+}
+
+#drop-zone .blur p {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 90%;
+    height: 90%;
+    border: 10px dashed var(--blue);
+}
+
 /* ADVERTENCIA PARA EL MODAL ------------------------------------------- */
 #bodyAlertPlaceholder {
     position: fixed;
@@ -324,6 +372,10 @@ textarea,
     .header-c .btn i,
     .header-c .btn img {
         display: block !important;
+    }
+
+    .header-c .btn i {
+        font-size: 1.5em;
     }
 
     .header-c .btn img {

@@ -56,9 +56,9 @@
                         <div class="blur-section-item"></div>
 
                         {% for object in object_list %}
-                        	<div class="item {% if object.prj_autosave == False %}item-{{ object.prj_autosave }}{% endif %}" data-project-id="{{ object.id }}">
+                        	<div class="item{% if object.prj_autosave == False %} item-{{ object.prj_autosave }}{% endif %}" data-project-id="{{ object.id }}">
 
-                                <a class="col1" href="{% url 'manage_project' object.id %}">
+                                <a class="col1{% if object.prj_autosave == False %} disabled{% endif %}" href="{% url 'manage_project' object.id %}">
                                     <span class="title-pj">{{ object.prj_name }}</span>
                                 </a>
 
@@ -259,6 +259,8 @@
             </div>
         </div>
         </div>
+    
+        <div id="modalAlertPlaceholder2"></div>
     </div>
     
     

@@ -27,7 +27,7 @@
             <div class="container-fluid cont-report">
 
 {#        ------------------------------------------- HEADER DEL CONTAINER -------------------------------------------#}
-                <div class="row">
+                <div class="row" style="flex: 0;">
                     <div class="col mb-3">
                         <h5 class="card-title">{{ object.id_project.prj_name }}</h5>
                         <p class="card-text">Informe de los resultados del procesamiento.</p>
@@ -36,7 +36,7 @@
 
 
 {#        ------------------------------------------- BODY DEL CONTAINER -------------------------------------------#}
-                <div class="row scrollable-row scroll-styled">
+                <div class="row scrollable-row scroll-styled" style="flex: 1 0 0;">
 
     {#                ---------------------------- GRÁFICA DE REPORTE ----------------------------#}
                     <div class="col-12 col-lg-7 container_pastel">
@@ -140,17 +140,18 @@
 
 
 {#        ------------------------------------------- FOOTER DEL CONTAINER -------------------------------------------#}
-                <div class="row">
-                    <div class="col my-2 d-flex justify-content-end">
-                        <button class="btn btn_warning" data-bs-toggle="modal"
-                            data-bs-target="#guardar_proyecto">
-                            <i class="bi bi-floppy2-fill"></i>
-                            Guardar proyecto
-                        </button>
+                {% if object.id_project.prj_autosave == False %}
+                	<div class="row" style="flex: 0;">
+                        <div class="col my-2 d-flex justify-content-end">
+                            <button class="btn btn_warning" data-bs-toggle="modal"
+                                data-bs-target="#add_project">
+                                <i class="bi bi-floppy2-fill"></i>
+                                Guardar proyecto
+                            </button>
+                        </div>
                     </div>
-                </div>
-
-
+                {% endif %}
+            
             </div>
 
         </div>
@@ -160,41 +161,48 @@
 <!-- Modal's -->
 
 {% block modals %}
-    <!-- Guardar Proyecto -->
-    <div class="modal fade" id="guardar_proyecto" data-bs-backdrop="static" data-bs-keyboard="false"
-        tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <!-- Modal CREAR Proyecto  -------------------------------------------------------------------------->
+    <div class="modal fade" id="add_project" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg_warning text_primary">
-                    <h4 class="modal-title w-100 text-center">
-                        <i class="bi bi-floppy2-fill"></i>
-                        Guardar Proyecto
-                    </h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body fondo pe-5 ps-5">
-                    <div class="input-group mb-3">
-                        <span class="input-group-text" id="basic-addon1">
-                            <i class="bi bi-pencil-fill"></i>
-                        </span>
-                        <input type="text" class="form-control" placeholder="Nombre del proyecto"
-                            aria-label="password" aria-describedby="basic-addon1">
-                    </div>
+        <div class="modal-content">
+            <div class="modal-header">
 
-                    <div class="input-group mb-3">
-                        <span class="input-group-text" id="basic-addon1">
-                            <i class="bi bi-card-text"></i>
-                        </span>
-                        <textarea type="text" class="form-control textarea" placeholder="Descripción"
-                            aria-label="password" aria-describedby="basic-addon1"></textarea>
-                    </div>
+                <i class="bi bi-folder-plus"></i>
+                <h1 class="modal-title fs-3" id="staticBackdropLabel">Nuevo Proyecto</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            </div>
+
+            <div class="modal-body d-flex justify-content-center">
+
+                <div class="col col-11">
+                    <form action="{% url 'create_project' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="form-floating mt-3 mb-3">
+                            <input name="prj_name" type="text" class="form-control" id="titleProject" minlength="10" maxlength="50" required placeholder="Nombre del proyecto">
+                            <label for="titleProject">Nombre del proyecto</label>
+                        </div>
+    
+                        <div class="form-floating mt-3 mb-3">
+                            <textarea name="prj_description" class="form-control" placeholder="Dale una descripción a tu proyecto" id="textProject" style="height: 100px"></textarea>
+                            <label for="textProject">Descripción de proyecto</label>
+                        </div>
+                        
+                        <button hidden id="submit-btn" type="submit"></button>
+                    </form>
                 </div>
-                <div class="modal-footer fondo d-flex justify-content-center">
-                    <button type="button" class="btn btn_primary col-auto" data-bs-toggle="modal"
-                        data-bs-target="#confirmar">Confirmar</button>
-                </div>
+
+
+            </div>
+
+            <div class="modal-footer">
+                <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> -->
+                <button type="button" class="btn btn-primary col-3" onclick="createProject()">Crear</button>
             </div>
         </div>
+        </div>
+    
+        <div id="modalAlertPlaceholder2"></div>
     </div>
 {% endblock modals %}
 

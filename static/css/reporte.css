@@ -119,7 +119,11 @@
     color: white;
 }
 
-
+#add_project .modal-header {
+    background: rgb(255, 180, 20);
+    background: linear-gradient(100deg, rgba(255, 180, 20, .75) 40%, rgba(255, 129, 24, .85) 91%);
+    color: var(--blue-dark);
+}
 
 /*Estilos del pastel*/
 
@@ -179,6 +183,9 @@ svg {
     height: auto;
 }
 
+.scrollable-row {
+     max-height: inherit;
+}
 
 
 /* ------------------------------------------------------------------------------ QUERIES */

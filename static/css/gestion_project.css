@@ -104,6 +104,24 @@
     font-size: 20px;
 }
 
+.data-files .img-folder {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.data-files .img-folder img {
+    width: 30%;
+    margin-bottom: 10px;
+}
+
+.data-files .img-folder p {
+    font-size: 1.25em;
+
+}
+
 .table_container {
     height: 100%;
     overflow-y: auto;
@@ -192,6 +210,7 @@ span svg {
 }
 
 .container_files {
+    position: relative;
     display: flex;
     flex-direction: column;
     height: auto;
@@ -221,6 +240,26 @@ span svg {
 .container_files::-webkit-scrollbar-thumb:hover {
     background-color: #082c50;
     /* Color del pulgar de la barra de desplazamiento al pasar el ratón */
+}
+
+.container_files .img-folder {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.container_files .img-folder img {
+    width: 55%;
+    margin-bottom: 5px;
+}
+
+.container_files .img-folder p {
+    font-size: 1.25em;
+    user-select: none; /* Evita que la imagen sea arrastrable */
 }
 
 .title-list {
@@ -338,6 +377,25 @@ span svg {
 }
 
 /*UTILS ------------------------------------------------------------------------------------------------------*/
+.div-hidden {
+    display: none !important;
+}
+
+
+.info-autosave p:last-child,
+.info-guide .cell {
+    display: none !important;
+}
+
+.info-guide .desktop,
+.info-guide .cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+
 .info-guide img {
     width: 90%;
 }
@@ -346,14 +404,31 @@ span svg {
     display: block !important; /* Mostramos la última porque en el anterior lo ocultamos */
 }
 
+/* DROP ZONE ------------------------------------------ */
+#drop-zone {
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
 
+#drop-zone .blur {
+    font-size: 2em;
+}
 
+#drop-zone.is-active .blur {
+    z-index: 2;
+}
 
 
 
 /*QUERIES ----------------------------------------------------------------------------------------*/
 
 @media (max-width: 768px) {
+    .header-c button i {
+        font-size: 2.2em !important;
+    }
+
     .container_content {
         flex-direction: column;
         max-height: 100%;
@@ -417,6 +492,28 @@ span svg {
         display: block;
         /* Muestra el select en pantallas pequeñas */
     }
+
+
+
+
+    /*Utils*/
+    .info-autosave p:last-child {
+        display: block !important;
+    }
+
+    .info-guide .cell {
+        display: flex !important;
+    }
+
+    .info-autosave p:first-child,
+    .info-guide .desktop {
+        display: none;
+    }
+
+    .container_files .img-folder {
+        display: none !important;
+    }
+
 }
 
 @media (max-height: 768px) {

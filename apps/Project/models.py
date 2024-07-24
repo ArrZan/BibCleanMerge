@@ -21,7 +21,7 @@ class Project(models.Model):
     prj_description = models.TextField(default='Sin descripción', null=True, blank=True)
     prj_date = models.DateField(auto_now_add=True)  # Permite agregar la fecha actual al registrar
     prj_last_modified = models.DateField(auto_now=True)  # Permite agregar la fecha al modificar
-    prj_autosave = models.BooleanField(default=False)  # Nos permite saber si el proyecto se autoguardó
+    prj_autosave = models.BooleanField(default=False)  # Nos permite saber si el proyecto se autoguardó (False)
 
     class Meta:
         unique_together = ('id_usuario', 'prj_name')
@@ -33,7 +33,7 @@ class Project(models.Model):
 
         if self.reports.exists():
             reports = self.reports.values('name_file', 'rep_n_articles_files', 'id').last()
-            reports['name_file'] = f'{settings.MEDIA_URL}/files/bib/{reports['name_file']}'
+            reports['name_file'] = self.reports.last().get_file_path()
             reports['disabled'] = ''
         else:
             reports = {
@@ -59,7 +59,7 @@ class Base(models.Model):
 
     def get_file_path(self):
         if self.name_file:
-            return f'{settings.MEDIA_URL}/files/bib/{self.name_file}'
+            return f'{settings.MEDIA_URL}files/bib/{self.name_file}'
         else:
             return None
 
@@ -197,8 +197,6 @@ class ProjectFile:
 
         formatted_time = f"{minu:02}:{sec:02} seg"  # Tiempo formateado
 
-        print(formatted_time)
-
         count = 0
         # Generador
         for entry in bib_database.entries:
@@ -256,6 +254,7 @@ class ProjectFile:
         self.num_sheeps = len(self.sheeps_ids)
         self.num_white_sheeps = len(self.white_sheeps_ids)
         self.num_black_sheeps = self.num_sheeps - self.num_white_sheeps
+        print(self.num_black_sheeps, " numero de obejas")
 
         self.exist_b_sheep = True if self.num_black_sheeps > 0 else False
 
