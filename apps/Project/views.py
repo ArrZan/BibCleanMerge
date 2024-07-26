@@ -203,26 +203,15 @@ class DeleteProjectFileView(LoginRequiredMixin, AccessOwnerMixin, DeleteView):
     model = ProjectFiles
 
     def form_valid(self, form):
+        projectFile = get_object_or_404(ProjectFiles, pk=self.kwargs['pk'])
         try:
-            # Obtenemos el objeto a eliminar
-            projectFile = self.get_object()
-
-            # nombre del archivo para eliminarlo del sistema
-            file_name = projectFile.name_file
-
-            # Eliminamos el objeto
+            # Borramos priimero el archivo y luego el objeto
+            projectFile.delete_File()
             projectFile.delete()
 
-            # Elimina el archivo del sistema de archivos
-            if file_name:
-                file_path = os.path.join(settings.MEDIA_ROOT, 'files', 'bib', file_name)
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-
-            # Devolvemos una respuesta JSON indicando éxito
             return JsonResponse({'message': 'Archivo eliminado.'})
-        except ProjectFiles.DoesNotExist:
-            return JsonResponse({'error': 'Error: Archivo no encontrado.'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': 'Ocurrió un error.'})
 
 """
 ---------------------------------------------------------------------- Eliminación de un proyectos
@@ -237,7 +226,8 @@ class DeleteProjectView(LoginRequiredMixin, AccessOwnerMixin, DeleteView):
             # Obtenemos el objeto a eliminar
             project = self.get_object()
 
-            # ELIMINAR LOS ARCHIVOS QUE SE GUARDAN DE LOS PROJECT FILES
+            # Eliminamos todos los archivos asociados
+            project.deleteFiles()
 
             # Eliminamos el objeto
             project.delete()
@@ -245,7 +235,7 @@ class DeleteProjectView(LoginRequiredMixin, AccessOwnerMixin, DeleteView):
             # Devolvemos una respuesta JSON indicando éxito
             return JsonResponse({'message': 'Proyecto eliminado.'})
         except Project.DoesNotExist:
-            return JsonResponse({'error': 'Error: Proyecto no encontrado.'}, status=404)
+            return JsonResponse({'error': 'Error: Proyecto no encontrado.'})
 
 
 """

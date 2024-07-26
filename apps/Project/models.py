@@ -32,9 +32,13 @@ class Project(models.Model):
     def get_last_report(self):
 
         if self.reports.exists():
-            reports = self.reports.values('name_file', 'rep_n_articles_files', 'id').last()
-            reports['name_file'] = self.reports.last().get_file_path()
-            reports['disabled'] = ''
+            last_report = self.reports.last()
+            reports = {
+                'name_file': last_report.get_file_url(),
+                'rep_n_articles_files': last_report.rep_n_articles_files,
+                'id': last_report.id,
+                'disabled': '',
+            }
         else:
             reports = {
                 'name_file': '#',
@@ -44,6 +48,15 @@ class Project(models.Model):
             }
 
         return reports
+
+    def deleteFiles(self):
+        if self.reports.exists():
+            for report in self.reports.all():
+                report.delete_File()
+
+        if self.files.exists():
+            for file in self.files.all():
+                file.delete_File()
 
 
 class Base(models.Model):
@@ -57,14 +70,25 @@ class Base(models.Model):
     def __str__(self):
         return self.name_file
 
+    def get_file_url(self):
+        if self.name_file:
+            return os.path.join(settings.MEDIA_URL, 'files', 'bib', self.name_file)
+        return None
+
     def get_file_path(self):
         if self.name_file:
-            return f'{settings.MEDIA_URL}files/bib/{self.name_file}'
-        else:
-            return None
+            return os.path.join(settings.MEDIA_BIB, self.name_file)
+        return None
 
     def get_name_split(self):
         return self.name_file.split('___')[-1]
+
+    def delete_File(self):
+        # Elimina el archivo del sistema de archivos
+        if self.name_file:
+            filepath = self.get_file_path()
+            if os.path.exists(filepath):
+                os.remove(filepath)
 
 
 class ProjectFiles(Base):
