@@ -84,7 +84,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'BibCleanMerge',
-        'HOST': 'LAPTOPBRIGNER10',
+        'HOST': 'DESKTOP-PLOD91E',
         'PORT': '',
 
         'OPTIONS': {

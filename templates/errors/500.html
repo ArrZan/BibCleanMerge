@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block cssCustoms2 %}
+    <style>
+        .body {
+            background: white;
+        }
+
+        .card-style {
+            width: 70%;
+        }
+
+        .card-style .header {
+            background: #082C50;
+            height: 45px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            display: flex;
+            justify-content: end;
+        }
+
+        .card-style .header li:last-child {
+            background: #FF8118;
+        }
+
+        .card-style .header li {
+            width: 25px;
+            height: 25px;
+            margin-left: 5px;
+            border-radius: 50%;
+            background: #D8D8D8;
+            list-style-type: none;
+        }
+
+        .card-style .body {
+            padding: 15% 5% 15% 5%;
+            background: #E5E8ED;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .card-style .body h1:first-child {
+            color: #082C50;
+        }
+
+    </style>
+{% endblock %}
+
+{% block main %}
+    <div style="display: flex;justify-content: center;align-items: center;width: 100vw;height: 100vh;flex-direction: column">
+        <div class="card-style">
+            <div class="header">
+                <ul style="display: flex;margin: 0;justify-content: center;align-items: center; padding-right: 10px;">
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                </ul>
+            </div>
+            <div class="body">
+                <h1 style="font-weight: bold;">Error 500 <i class="bi bi-emoji-dizzy"></i></h1>
+                <h1>¡Algo salió mal, inténtalo más tarde!</h1>
+            </div>
+        </div>
+    </div>
+    
+{% endblock %}

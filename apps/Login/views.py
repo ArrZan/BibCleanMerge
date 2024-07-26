@@ -118,3 +118,13 @@ def account_locked(request):
     title = "Cuenta Bloqueada"
 
     return render(request, 'registration/account_locked.html', {'title': title})
+
+
+class Error404View(TemplateView):
+    template_name = 'errors/404.html'
+    extra_context = {'title': 'Página no encontrada'}
+
+
+class Error500View(TemplateView):
+    template_name = 'errors/500.html'
+    extra_context = {'title': '¡Algo salió mal!'}

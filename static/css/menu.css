@@ -267,7 +267,7 @@ body {
         height: 100%;
         opacity: 1;
         visibility: visible;
-        z-index: 2;
+        z-index: 4;
     }
 
     .main-container.hidden-sb .blur-section {
@@ -281,7 +281,7 @@ body {
         background: rgb(8, 44, 80);
         background: linear-gradient(4deg, rgba(8, 44, 80, 1) 37%, rgba(25, 68, 102, 1) 100%);
         overflow: hidden;
-        z-index: 3;
+        z-index: 4;
         padding: 0 2.5%;
     }
 

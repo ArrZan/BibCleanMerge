@@ -21,7 +21,7 @@ class PurgeData:
         # Definir el orden de los campos y el formato
         field_order = [
             ('author', '{{{0}}},\n', True),
-            ('title', '{{{{"{0}"}}}},\n', True),
+            ('title', '{{{0}}},\n', True),
             ('journal', '{{{0}}},\n', True),
             ('volume', '{{{0}}},\n', True),
             ('number', '{{{0}}},\n', True),
@@ -53,7 +53,7 @@ class PurgeData:
                 if field == 'title':
                     s += self.union(field, '{0} {1}'.format(self.contArt, entry[field]))
                 else:
-                    s += '{0}={1}'.format(field, fmt.format(entry[field]))
+                    s += '{0}={1}\n'.format(field, fmt.format(entry[field]))
 
         # Manejar tipos de keywords
         keyword = 0

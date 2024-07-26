@@ -843,6 +843,10 @@
         display: block;
     }
 
+    .info-guide img:last-child {
+        width: 100%;
+    }
+
     .ct-body .item-False .col2 .btn-checksave {
         font-size: 18px !important;
     }

@@ -261,7 +261,7 @@ body {
 
     #form-log .col-md-7 img,
     #form-reg .col-md-5 img {
-        width: 50%;
+        width: 75%;
     }
 }
 
@@ -344,6 +344,10 @@ body {
     .container .card-body {
         justify-content: start !important;
         padding: 16px 0;
+    }
+
+    .container #card-center {
+        justify-content: center !important;
     }
 
     .container form {
