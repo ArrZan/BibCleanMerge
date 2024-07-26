@@ -17,10 +17,17 @@
                 <div class="col col-10">
                     <h2 class="mb-0">REPORTE DE PROYECTO</h2>
                 </div>
-                <div class="col col-2 h4 d-flex justify-content-end mb-0">
+	            {% if id_project_autosave == False %}
+	            	<div class="col col-2 h4 d-flex justify-content-end mb-0">
                         <button type="button" class="btn-close" data-bs-toggle="modal"
                                 data-bs-target="#modal-saveproject" ></button>
-                </div>
+                    </div>
+	            {% else %}
+		            <div class="col col-2 h4 d-flex justify-content-end mb-0">
+                        <a href="{% url 'list_projects' %}" type="button" class="btn-close"></a>
+                    </div>
+	            {% endif %} 
+                
             </div>
         </div>
         <div class="card-body">

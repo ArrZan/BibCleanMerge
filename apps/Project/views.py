@@ -263,6 +263,7 @@ class ReportDetailView(LoginRequiredMixin, AccessOwnerMixin, DetailView):
         # Enviamos del proyecto para poder elimiarlo
         report = self.get_object()
         context['id_project'] = report.id_project.id
+        context['id_project_autosave'] = report.id_project.prj_autosave
         print('Id del proyecto a borrar: ',report.id_project.id)
 
         return context
