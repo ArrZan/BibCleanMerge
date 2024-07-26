@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (ListProjectsView, ProcesamientoView, CreateProjectView, ManageProjectView,
                     ReportDetailView, DeleteProjectView, AutoSaveProjectView, UpdateProjectView,
                     AddFileView, UpdateProjectFilesView, DeleteProjectFileView, ListReportsView,
-                    ProcesamientoView2)
+                    ProcesamientoView2, DeleteProjectView2)
 
 
 urlpatterns = [
@@ -15,6 +15,7 @@ urlpatterns = [
     path('editVarFile/<int:pk>/', UpdateProjectFilesView.as_view(), name='edit_var_projectfiles'),
     path('process/<int:pk>/', ProcesamientoView2.as_view(), name='process'),
     path('delete/<int:pk>/', DeleteProjectView.as_view(), name='delete_project'),
+    path('project/<int:pk>/delete/', DeleteProjectView2.as_view(), name='delete_project2'),
     path('deleteFile/<int:pk>/', DeleteProjectFileView.as_view(), name='delete_projectfiles'),
     path('autosave/<int:project_id>/', AutoSaveProjectView.as_view(), name='autosave_project'),
 

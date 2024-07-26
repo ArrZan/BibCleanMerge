@@ -31,7 +31,7 @@
                                     </span>
 										<input type="text" id="id_username" class="form-control" placeholder="Usuario"
 										       aria-label="Usuario" name="username"
-										       aria-describedby="basic-addon1" 
+										       aria-describedby="basic-addon1"
 										       value="{{ form.username.value|default:''  }}" required>
 									</div>
 								</div>
@@ -43,7 +43,7 @@
                                     </span>
 										<input type="text" id="id_first_name" class="form-control"
 										       placeholder="Nombres"  name="first_name"
-										       aria-describedby="basic-addon1" 
+										       aria-describedby="basic-addon1"
 										       value="{{ form.first_name.value|default:''  }}" required>
 									</div>
 								</div>
@@ -111,12 +111,30 @@
 			</div>
 		</div>
 	</div>
-	
+
 	{% if form.errors %}
 		<div id="bodyAlertPlaceholder" class="fixed-button">
 			<div>
 				<div class="alert alert-success alert-dismissible" role="alert">
-					<div>{{ form.errors }}</div>
+					{% for field, errors in form.errors.items %}
+						{% for error in errors %}
+							<div>
+								{% if field == "username" %}
+									<b>Nombre de usuario:</b> {{ error }}
+								{% elif field == "first_name" %}
+									<b>Nombres:</b> {{ error }}
+								{% elif field == "last_name" %}
+									<b>Apellidos:</b> {{ error }}
+								{% elif field == "email" %}
+									<b>Correo electrónico:</b> {{ error }}
+								{% elif field == "password1" %}
+									<b>Contraseña:</b> {{ error }}
+								{% elif field == "password2" %}
+									<b>Confirmar contraseña:</b> {{ error }}
+								{% endif %}
+							</div>
+						{% endfor %}
+					{% endfor %}
 					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 				</div>
 			</div>
