@@ -65,7 +65,9 @@ $d.addEventListener('DOMContentLoaded', ev => {
                         const fileList = $d.getElementById('fileList');
 
                         addItems(fileList, data.entries);
-                        this.value = "";
+
+                        // Vaciamos el input por si el usuario desea agregar el mismo archivo nuevamente
+                        btnAddFile.value = "";
 
                         if (contItem === 0) {
                             tableVariables.classList.add('div-hidden');
@@ -156,7 +158,6 @@ $d.addEventListener('DOMContentLoaded', ev => {
             listItemsActions(listItem);
 
             contItem++;
-            console.log(contItem);
         })
     }
 
@@ -326,7 +327,14 @@ $d.addEventListener('DOMContentLoaded', ev => {
             listItem.remove(); // Elimina el <li> completo al hacer clic en el botón de eliminar
             $d.querySelector(`tbody td.tr-${idFile}`).parentElement.remove(); // Eliminamos la variable
             $d.getElementById(`table${idFile}`).remove(); // Eliminamos la tabla
-            $d.querySelector('.data-container').classList.add('table-display');
+
+            // Revisa si hay una tabla visualizando
+            let tableShowing = $d.querySelector('.table_container.table-display');
+            if (!tableShowing) {
+                // Mostrar la información del proyecto
+                $d.querySelector('.data-container').classList.add('table-display');
+            }
+
         });
 
         cancelButton.addEventListener('click', function () {

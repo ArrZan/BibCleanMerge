@@ -23,6 +23,6 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
+# Esto servirá únicamente cuando el servidor esté en despliegue (DEBUG=False)
 handler404 = Error404View.as_view()
-
 handler500 = Error500View.as_view()

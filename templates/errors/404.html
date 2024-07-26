@@ -44,6 +44,11 @@
             color: #082C50;
         }
 
+        a {
+            color: #0A273E;
+            font-size: 1.2em;
+        }
+
     </style>
 {% endblock %}
 
@@ -60,6 +65,7 @@
             <div class="body">
                 <h1 style="font-weight: bold;">Error 404 <i class="bi bi-emoji-dizzy"></i></h1>
                 <h1>¡Oops! ¡No encontramos la página que estás buscando!</h1>
+                <a href="{% url 'list_projects' %}">Volver a la página principal.</a>
             </div>
         </div>
     </div>

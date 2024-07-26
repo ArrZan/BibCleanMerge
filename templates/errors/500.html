@@ -43,6 +43,11 @@
         .card-style .body h1:first-child {
             color: #082C50;
         }
+        
+        a {
+            color: #0A273E;
+            font-size: 1.2em;
+        }
 
     </style>
 {% endblock %}
@@ -60,8 +65,9 @@
             <div class="body">
                 <h1 style="font-weight: bold;">Error 500 <i class="bi bi-emoji-dizzy"></i></h1>
                 <h1>¡Algo salió mal, inténtalo más tarde!</h1>
+                <a href="{% url 'list_projects' %}">Volver a la página principal.</a>
             </div>
         </div>
     </div>
-    
+
 {% endblock %}
