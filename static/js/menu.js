@@ -1,59 +1,53 @@
 const $d = document;
+let mainCont = $d.querySelector('.main-container');
+const sidebarBtn = $d.querySelector('.sidebar-btn');
+const blurSection = $d.querySelector('.blur-section');
+const navbarBtn = $d.querySelector('.navbar-btn');
 
-let mainCont = document.querySelector('.main-container');
+// Función para obtener el estado del sidebar desde localStorage
+const getSidebarState = () => localStorage.getItem('sidebarState') === 'visible';
 
-// Botón sidebar para mostrar y ocultar el sidebar
-document.querySelector('.sidebar-btn').addEventListener('click', function() {
-    mainCont.classList.toggle('hidden-sb');
-})
+// Función para guardar el estado del sidebar en localStorage
+const setSidebarState = (isVisible) => {
+    localStorage.setItem('sidebarState', isVisible ? 'visible' : 'hidden');
+};
+
+// Inicializar el estado del sidebar
+const initializeSidebar = () => {
+    if (getSidebarState()) {
+        mainCont.classList.remove('hidden-sb');
+    } else {
+        mainCont.classList.add('hidden-sb');
+    }
+};
+
+// Llamada inicial para configurar el estado del sidebar
+initializeSidebar();
+
+// Botón del sidebar para mostrar y ocultar el sidebar
+sidebarBtn.addEventListener('click', function() {
+    if (getSidebarState()) {
+        mainCont.classList.add('hidden-sb');
+        setSidebarState(false);
+    } else {
+        mainCont.classList.remove('hidden-sb');
+        setSidebarState(true);
+    }
+});
 
 // Pantalla de Blur del sidebar cuando sea en dispositivos smartphone
-// Cuando se haga clic en  este, el sidebar se repliega, el blur se oculta y se le devuelve el scroll al body
-document.querySelector('.blur-section').addEventListener('click', function() {
+// Cuando se haga clic en este, el sidebar se repliega, el blur se oculta y se le devuelve el scroll al body
+blurSection.addEventListener('click', function() {
     mainCont.classList.add('hidden-sb');
-    document.querySelector('.body').style.overflow = 'scroll';
-})
+    $d.querySelector('.body').style.overflow = 'scroll';
+});
 
 // Botón del Navbar para mostrar el sidebar y por ende el blur
 // Mostramos el sidebar
-document.querySelector('.navbar-btn').addEventListener('click', function() {
+navbarBtn.addEventListener('click', function() {
     mainCont.classList.remove('hidden-sb');
-    document.querySelector('.body').style.overflow = 'hidden';
-})
-
-
-// document.addEventListener('DOMContentLoaded', function() {
-//     // Verificar el estado guardado del sidebar en sessionStorage
-//     var sidebar = document.getElementById('sidebar');
-//     var toggleButton = document.getElementById('toggleSidebar');
-//
-//     // Si no hay estado guardado, inicializar con el sidebar visible
-//     if (!sessionStorage.getItem('sidebarState')) {
-//         sidebar.classList.remove('hidden-sb');
-//     } else {
-//         // Aplicar el estado guardado
-//         var sidebarState = sessionStorage.getItem('sidebarState');
-//         if (sidebarState === 'hidden') {
-//             sidebar.classList.add('hidden-sb');
-//         } else {
-//             sidebar.classList.remove('hidden-sb');
-//         }
-//     }
-//
-//     // Escuchar clic en el botón de toggle del sidebar
-//     toggleButton.addEventListener('click', function() {
-//         sidebar.classList.toggle('hidden-sb');
-//
-//         // Guardar el estado actual en sessionStorage
-//         if (sidebar.classList.contains('hidden-sb')) {
-//             sessionStorage.setItem('sidebarState', 'hidden');
-//         } else {
-//             sessionStorage.setItem('sidebarState', 'visible');
-//         }
-//     });
-// });
-
-
+    $d.querySelector('.body').style.overflow = 'hidden';
+});
 
 // MOSTRADOR DE ALERTAS DE BOOSTRAP ---------------------------------------------------------------
 
@@ -61,10 +55,10 @@ const appendAlert = (message, type, idAlertDiv='modalAlertPlaceholder') => {
     const alertPlaceholder = $d.getElementById(idAlertDiv);
     const wrapper = $d.createElement('div');
     wrapper.innerHTML = [
-    `<div class="alert alert-${type} alert-dismissible" role="alert">`,
-    `   <div>${message}</div>`,
-    '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
-    '</div>'
+        `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+        `   <div>${message}</div>`,
+        '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+        '</div>'
     ].join('');
 
     alertPlaceholder.append(wrapper);
@@ -75,8 +69,7 @@ const appendAlert = (message, type, idAlertDiv='modalAlertPlaceholder') => {
 
         setTimeout(() => {
             wrapper.remove(); // Elimina el elemento del DOM
-        }, 1001);// 1 segundos
+        }, 1001); // 1 segundo
 
     }, 3000); // 3000 milisegundos = 3 segundos
-
 };
