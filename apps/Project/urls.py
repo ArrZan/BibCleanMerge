@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (ListProjectsView, ProcesamientoView, CreateProjectView, ManageProjectView,
                     ReportDetailView, DeleteProjectView, AutoSaveProjectView, UpdateProjectView,
                     AddFileView, UpdateProjectFilesView, DeleteProjectFileView, ListReportsView,
-                    ProcesamientoView2)
+                    ProcesamientoView2, DeleteProjectReportView)
 
 
 urlpatterns = [
@@ -16,6 +16,7 @@ urlpatterns = [
     path('process/<int:pk>/', ProcesamientoView2.as_view(), name='process'),
     path('delete/<int:pk>/', DeleteProjectView.as_view(), name='delete_project'),
     path('deleteFile/<int:pk>/', DeleteProjectFileView.as_view(), name='delete_projectfiles'),
+    path('deleteReport/<int:pk>/', DeleteProjectReportView.as_view(), name='delete_report'),
     path('autosave/<int:project_id>/', AutoSaveProjectView.as_view(), name='autosave_project'),
 
     # Procesamiento rápido

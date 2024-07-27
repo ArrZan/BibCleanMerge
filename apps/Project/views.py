@@ -213,6 +213,28 @@ class DeleteProjectFileView(LoginRequiredMixin, AccessOwnerMixin, DeleteView):
         except Exception as e:
             return JsonResponse({'error': 'Ocurrió un error.'})
 
+
+"""
+---------------------------------------------------------------------- Eliminación de un REPORTE de un proyecto
+"""
+
+
+class DeleteProjectReportView(LoginRequiredMixin, AccessOwnerMixin, DeleteView):
+    model = Report
+
+    def form_valid(self, form):
+        report = get_object_or_404(Report, pk=self.kwargs['pk'])
+        try:
+            # Borramos priimero el archivo y luego el objeto
+            report.delete_File()
+            report.delete()
+
+            return JsonResponse({'message': 'Reporte eliminado.'})
+
+        except Exception as e:
+            return JsonResponse({'error': 'Ocurrió un error.'})
+
+
 """
 ---------------------------------------------------------------------- Eliminación de un proyectos
 """

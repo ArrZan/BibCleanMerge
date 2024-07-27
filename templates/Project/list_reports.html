@@ -37,7 +37,7 @@
 
             <div class="ct-body">
                 <div class="row header">
-                    <div class="col-r col1">Nombre del proyecto</div>
+                    <div class="col-r col1">Nombre del Reporte</div>
                     <div class="col-r col2 d-flex justify-content-center">N. Artículos</div>
                     <div class="col-r col3 d-flex justify-content-center">Fecha</div>
                     <div class="col-r col4 d-flex justify-content-end">Opciones</div>
@@ -45,6 +45,8 @@
 
                 <div class="row body scroll-st scroll-style">
                     <div class="items">
+                        <!-- Un blur para cuando se active un menu-options -->
+                        <div class="blur-section-item"></div>
 
                         {% for report in reports %}
                         	<div class="item" data-project-id="{{ report.id }}">
@@ -80,7 +82,7 @@
                                                     <span class="text">Descargar merged</span>
                                                 </a>
 
-                                                <button class="btn btn-trash" data-bs-toggle="modal" data-bs-target="#delete-project" data-project-id="{{ report.id }}" data-project-url="{% url 'delete_project' report.id %}" onclick="showDeleteModal(this)">
+                                                <button class="btn btn-trash" data-bs-toggle="modal" data-bs-target="#delete-project" data-project-id="{{ report.id }}" data-project-url="{% url 'delete_report' report.id %}" onclick="showDeleteModal(this)">
                                                     <i class="bi bi-trash-fill"></i>
                                                     <span class="text">Eliminar</span>
                                                 </button>

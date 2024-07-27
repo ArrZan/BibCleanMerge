@@ -444,9 +444,11 @@ $d.addEventListener("DOMContentLoaded", function () {
 
 // Función para verificar si hay items y presentar una imagne
 function verificateItems() {
-    if ($d.querySelector('.ct-body .item')) {
-        $d.querySelector('.non-image').classList.add('n-inactive');
-    } else {
-        $d.querySelector('.non-image').classList.remove('n-inactive');
+    if ($d.querySelector('.non-image')) {
+        if ($d.querySelector('.ct-body .item')) {
+            $d.querySelector('.non-image').classList.add('n-inactive');
+        } else {
+            $d.querySelector('.non-image').classList.remove('n-inactive');
+        }
     }
 }
