@@ -2,9 +2,14 @@
     height: 100%;
 }
 
-/*#grafica {*/
-/*    max-width: 500px;*/
-/*}*/
+.btn-back {
+    background: var(--gray-dark);
+    color: white;
+}
+
+.btn-back:hover {
+    background: var(--gray);
+}
 
 .cont-report {
     display: flex;

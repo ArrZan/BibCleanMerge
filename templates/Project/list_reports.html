@@ -51,7 +51,7 @@
                         {% for report in reports %}
                         	<div class="item" data-project-id="{{ report.id }}">
 
-                                <a class="col1 report-col" href="#" style="cursor: default">
+                                <a class="col1 report-col" href="{% url 'report_detail' report.id  %}">
                                     <span class="title-pj">Reporte {{ forloop.counter }}</span>
                                 </a>
 
@@ -72,11 +72,6 @@
 
 
                                             <div class="options">
-                                                <a class="btn btn-bar" href="{% url 'report_detail' report.id  %}">
-                                                    <i class="bi bi-bar-chart-line-fill"></i>
-                                                    <span class="text">Ver reporte</span>
-                                                </a>
-
                                                 <a class="btn btn-download" href="{{ report.get_file_url }}" download="">
                                                     <i class="bi bi-file-earmark-arrow-down-fill"></i>
                                                     <span class="text">Descargar merged</span>

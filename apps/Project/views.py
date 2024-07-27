@@ -272,6 +272,15 @@ class ReportDetailView(LoginRequiredMixin, AccessOwnerMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = f'Reporte de proceso'
+
+        # Obtener la URL anterior (referer)
+        referer = self.request.META.get('HTTP_REFERER')
+        if referer:
+            context['previous_page_url'] = referer
+        else:
+            # Si no hay URL anterior, regresar a la lista de proyectos
+            context['previous_page_url'] = reverse('list_projects')
+
         return context
 
     def check_permissions(self, obj):
