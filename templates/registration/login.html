@@ -76,8 +76,10 @@
 							<div>
 								{% if field == "__all__" %}
 									{{ error }}
-								{% else %}
-									{{ field }}: {{ error }}
+								{% elif field == "username" %}
+									<b>Nombre de usuario:</b> {{ error }}
+								{% elif field == "password" %}
+									<b>Contraseña:</b> {{ error }}
 								{% endif %}
 							</div>
 						{% endfor %}

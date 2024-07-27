@@ -18,9 +18,17 @@
                     <a type="button" class="btn btn-back me-2" href="{{ previous_page_url }}"><i class="bi bi-arrow-left"></i></a>
                     <h2 class="mb-0">REPORTE DE PROYECTO</h2>
                 </div>
-                <div class="col col-2 h4 d-flex justify-content-end mb-0">
-                        <a type="button" class="btn-close" aria-label="Close" href="{% url 'list_projects' %}"></a>
-                </div>
+	            {% if id_project_autosave == False %}
+	            	<div class="col col-2 h4 d-flex justify-content-end mb-0">
+                        <button type="button" class="btn-close" data-bs-toggle="modal"
+                                data-bs-target="#modal-saveproject" ></button>
+                    </div>
+	            {% else %}
+		            <div class="col col-2 h4 d-flex justify-content-end mb-0">
+                        <a href="{% url 'list_projects' %}" type="button" class="btn-close"></a>
+                    </div>
+	            {% endif %} 
+                
             </div>
         </div>
         <div class="card-body">
@@ -162,6 +170,44 @@
 <!-- Modal's -->
 
 {% block modals %}
+	<!-- Modal Guardar Proyecto?  -------------------------------------------------------------------------->
+    <div class="modal fade" id="modal-saveproject" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <i class="bi bi-archive"></i>
+                <h1 class="modal-title fs-4" id="exampleModalLabel">Desea guardar el proyecto?</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <div class="info-autosave">
+                    <p>Al <strong>Guardar</strong> el proyecto se guardara toda el información relacionada a el.</p>
+
+                    <p>Si lo decide <strong>Eliminar</strong>perderá toda la información que esté relaciona</p>
+                </div>
+
+
+
+            </div>
+
+            <div class="modal-footer">
+{#                <button type="button" class="btn btn-primary">No volver a mostrar</button>#}
+                <button type="button" data-bs-dismiss="modal" class="btn btn_primary" data-bs-toggle="modal"
+                                data-bs-target="#add_project">Guardar</button>
+	            <form method="post" action="{% url 'delete_project2' id_project %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Borrar</button>
+                </form>
+
+            </div>
+        </div>
+        </div>
+    </div>
     <!-- Modal CREAR Proyecto  -------------------------------------------------------------------------->
     <div class="modal fade" id="add_project" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">

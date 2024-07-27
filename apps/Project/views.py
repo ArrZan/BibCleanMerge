@@ -766,3 +766,25 @@ class ProcesamientoView2(LoginRequiredMixin, View):
             return JsonResponse({'error': 'Ocurrió un error en el servidor!',
                                  'error_message': str(e)}, status=500)
 
+
+class DeleteProjectView2(LoginRequiredMixin, DeleteView):
+    model = Project
+    success_url = reverse_lazy('list_projects')  # URL a la que redirigir después de borrar
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        # Iniciamos una transacción atómica para asegurarnos de que ambas operaciones se realicen o ninguna
+        with transaction.atomic():
+            # Borra lo s los regitros relacionados
+            ProjectFiles.objects.filter(project=self.object).delete()
+            print(self.object)
+            print(ProjectFiles.objects.filter(project=self.object))
+
+            # Borra el proyecto
+            self.object.delete()
+
+        return JsonResponse({'redirect_url': str(self.success_url)})
+
+    def get_success_url(self):
+        return self.success_url
