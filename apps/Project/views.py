@@ -127,7 +127,6 @@ class UpdateProjectView(LoginRequiredMixin, AccessOwnerMixin, UpdateView):
     form_class = ProjectForm
 
     def form_valid(self, form):
-
         try:
             project = self.get_object()
 
@@ -139,6 +138,11 @@ class UpdateProjectView(LoginRequiredMixin, AccessOwnerMixin, UpdateView):
                     # __dict__ nos devuelve un diccionario de los atributos de la instancia project,
                     # entonces modificamos el campo para actualizarlo
                     project.__dict__[field] = value
+
+            # Manejo del checkbox prj_autosave
+            prj_autosave = self.request.POST.get('prj_autosave')
+            if prj_autosave and prj_autosave == 'on':
+                project.prj_autosave = True
 
             project.save()
 
@@ -195,6 +199,32 @@ class ManageProjectView(LoginRequiredMixin, AccessOwnerMixin, DetailView):
 
 
 """
+---------------------------------------------------------------------- Eliminación de un proyectos
+"""
+
+
+class DeleteProjectView(LoginRequiredMixin, AccessOwnerMixin, DeleteView):
+    model = Project
+
+    def form_valid(self, form):
+        try:
+            with transaction.atomic():
+                # Obtenemos el objeto a eliminar
+                project = self.get_object()
+
+                # Eliminamos todos los archivos asociados
+                project.deleteFiles()
+
+                # Eliminamos el objeto
+                project.delete()
+
+            # Devolvemos una respuesta JSON indicando éxito
+            return JsonResponse({'message': 'Proyecto eliminado.'})
+        except Project.DoesNotExist:
+            return JsonResponse({'error': 'Error: Proyecto no encontrado.'})
+
+
+"""
 ---------------------------------------------------------------------- Eliminación de un archivo de un proyecto
 """
 
@@ -233,31 +263,6 @@ class DeleteProjectReportView(LoginRequiredMixin, AccessOwnerMixin, DeleteView):
 
         except Exception as e:
             return JsonResponse({'error': 'Ocurrió un error.'})
-
-
-"""
----------------------------------------------------------------------- Eliminación de un proyectos
-"""
-
-
-class DeleteProjectView(LoginRequiredMixin, AccessOwnerMixin, DeleteView):
-    model = Project
-
-    def form_valid(self, form):
-        try:
-            # Obtenemos el objeto a eliminar
-            project = self.get_object()
-
-            # Eliminamos todos los archivos asociados
-            project.deleteFiles()
-
-            # Eliminamos el objeto
-            project.delete()
-
-            # Devolvemos una respuesta JSON indicando éxito
-            return JsonResponse({'message': 'Proyecto eliminado.'})
-        except Project.DoesNotExist:
-            return JsonResponse({'error': 'Error: Proyecto no encontrado.'})
 
 
 """
@@ -765,26 +770,3 @@ class ProcesamientoView2(LoginRequiredMixin, View):
 
             return JsonResponse({'error': 'Ocurrió un error en el servidor!',
                                  'error_message': str(e)}, status=500)
-
-
-class DeleteProjectView2(LoginRequiredMixin, DeleteView):
-    model = Project
-    success_url = reverse_lazy('list_projects')  # URL a la que redirigir después de borrar
-
-    def delete(self, request, *args, **kwargs):
-        self.object = self.get_object()
-
-        # Iniciamos una transacción atómica para asegurarnos de que ambas operaciones se realicen o ninguna
-        with transaction.atomic():
-            # Borra lo s los regitros relacionados
-            ProjectFiles.objects.filter(project=self.object).delete()
-            print(self.object)
-            print(ProjectFiles.objects.filter(project=self.object))
-
-            # Borra el proyecto
-            self.object.delete()
-
-        return JsonResponse({'redirect_url': str(self.success_url)})
-
-    def get_success_url(self):
-        return self.success_url

@@ -14,11 +14,11 @@
     <div class="card">
         <div class="card-header">
             <div class="row">
-                <div class="col col-10" style="display: flex;">
+                <div class="col col-10 d-flex justify-content-center align-items-center">
                     <a type="button" class="btn btn-back me-2" href="{{ previous_page_url }}"><i class="bi bi-arrow-left"></i></a>
                     <h2 class="mb-0">REPORTE DE PROYECTO</h2>
                 </div>
-	            {% if id_project_autosave == False %}
+	            {% if object.id_project.prj_autosave == False %}
 	            	<div class="col col-2 h4 d-flex justify-content-end mb-0">
                         <button type="button" class="btn-close" data-bs-toggle="modal"
                                 data-bs-target="#modal-saveproject" ></button>
@@ -178,7 +178,7 @@
             <div class="modal-header">
 
                 <i class="bi bi-archive"></i>
-                <h1 class="modal-title fs-4" id="exampleModalLabel">Desea guardar el proyecto?</h1>
+                <h1 class="modal-title fs-4" id="exampleModalLabel">¿Desea guardar el proyecto?</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 
             </div>
@@ -186,9 +186,9 @@
             <div class="modal-body">
 
                 <div class="info-autosave">
-                    <p>Al <strong>Guardar</strong> el proyecto se guardara toda el información relacionada a el.</p>
+                    <p>Al <strong>Guardar</strong> el proyecto se guardará toda la información relacionada con el proyecto.</p>
 
-                    <p>Si lo decide <strong>Eliminar</strong>perderá toda la información que esté relaciona</p>
+                    <p>Si decide <strong>Eliminar</strong>, perderá toda la información que esté relaciona</p>
                 </div>
 
 
@@ -196,12 +196,11 @@
             </div>
 
             <div class="modal-footer">
-{#                <button type="button" class="btn btn-primary">No volver a mostrar</button>#}
                 <button type="button" data-bs-dismiss="modal" class="btn btn_primary" data-bs-toggle="modal"
                                 data-bs-target="#add_project">Guardar</button>
-	            <form method="post" action="{% url 'delete_project2' id_project %}">
+	            <form method="post" action="{% url 'delete_project' object.id_project.id %}" data-success-url="{% url 'list_projects' %}">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Borrar</button>
+                    <button type="submit" class="btn btn-danger" id="delete-project">Borrar</button>
                 </form>
 
             </div>
@@ -223,18 +222,21 @@
             <div class="modal-body d-flex justify-content-center">
 
                 <div class="col col-11">
-                    <form action="{% url 'create_project' %}" method="POST">
+                    <form action="{% url 'update_project' object.id_project.id %}" data-success-url="{% url 'list_projects' %}" method="POST">
                         {% csrf_token %}
                         <div class="form-floating mt-3 mb-3">
                             <input name="prj_name" type="text" class="form-control" id="titleProject" minlength="10" maxlength="50" required placeholder="Nombre del proyecto">
                             <label for="titleProject">Nombre del proyecto</label>
                         </div>
-    
+
                         <div class="form-floating mt-3 mb-3">
                             <textarea name="prj_description" class="form-control" placeholder="Dale una descripción a tu proyecto" id="textProject" style="height: 100px"></textarea>
                             <label for="textProject">Descripción de proyecto</label>
                         </div>
-                        
+
+                        <input hidden class="form-check-input" name="prj_autosave" id="prj_autosave" type="checkbox" checked>
+                        <label hidden class="form-check-label" for="prj_autosave"></label>
+
                         <button hidden id="submit-btn" type="submit"></button>
                     </form>
                 </div>
@@ -243,7 +245,6 @@
             </div>
 
             <div class="modal-footer">
-                <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> -->
                 <button type="button" class="btn btn-primary col-3" onclick="createProject()">Crear</button>
             </div>
         </div>
@@ -264,4 +265,5 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="{% static "js/menu.js" %}"></script>
     <script src="{% static "js/bar_report.js" %}"></script>
+    <script src="{% static "js/fetch_report.js" %}"></script>
 {% endblock js %}

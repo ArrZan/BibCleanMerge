@@ -130,6 +130,16 @@
     color: var(--blue-dark);
 }
 
+/* MODAL ----------------------------------------------------------------- */
+#modalAlertPlaceholder,
+#modalAlertPlaceholder2 {
+    position: fixed;
+    bottom: -6px;
+    right: 9px;
+    transition: all .3s;
+}
+
+
 /*Estilos del pastel*/
 
 .arc text {
