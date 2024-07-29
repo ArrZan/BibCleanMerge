@@ -4,6 +4,7 @@ import sys
 import time
 import itertools
 
+import unidecode
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction, IntegrityError
@@ -472,103 +473,33 @@ class ProcesamientoView(LoginRequiredMixin, View):
                         for chunk in file.chunks():
                             destination.write(chunk)
 
-                    newFile = ProjectFiles.objects.create(
+                    ProjectFiles.objects.create(
                         id_project=new_project,
                         name_file=fileName,
                     )
 
                     obj_entries.extract_data_file(file_decode)
+
                     purge.black_sheeps_ids += obj_entries.black_sheeps_ids
 
-                    # obj_entries.unificar_entradas(file_decode, purge)
+                    obj_entries.unificar_entradas(file_decode, purge)
 
-                    for entry in obj_entries.read_bibtext(file_decode):
-                        # purge = PurgeData()
-                        # Obtengo el tipo de entrada y lo acumulo en el diccionario (conteo de tipos de entrada)
-                        type_entry = obj_entries.get_type_entry(entry)
-
-                        if type_entry not in purge.count_entry_type_all:
-                            purge.count_entry_type_all[type_entry] = 1
-                        else:
-                            purge.count_entry_type_all[type_entry] += 1
-
-                        formatedEntry = purge.format_bibtext_entry(entry)
-
-                        # escribir todas las entradas formateadas de una vez al final
-                        with open(file_Path, 'a', encoding="utf8") as f:
-                            f.write(formatedEntry)
-
-                        newEntrie = ProjectFilesEntries.objects.create(
-                            id_project_files=newFile,
-                            pfe_title=entry.get('title', 'N/A'),
-                            pfe_authors=entry.get('author', 'N/A'),
-                            pfe_year=entry.get('year', 'N/A'),
-                            pfe_keywords=entry.get('keywords', 'N/A'),
-                            pfe_journal=entry.get('journal', 'N/A'),
-                            pfe_volume=entry.get('volume', 'N/A'),
-                            pfe_number=entry.get('number', 'N/A'),
-                            pfe_pages=entry.get('pages', 'N/A'),
-                            pfe_doi=entry.get('doi', 'N/A'),
-                        )
-                        print(purge.contArt - 1)
-
-                    print("*" * 50)
-                    print("Obejas: ", obj_entries.num_sheeps)
-                    print("Obejas blancas: ", obj_entries.num_white_sheeps)
-                    print("Obejas negras: ", obj_entries.num_black_sheeps)
-
-                    if obj_entries.num_black_sheeps > 0:
-                        filePath_black = os.path.join(settings.MEDIA_BIB, f'BSHEEP_{name_date}_{file.name}.txt')
-                        with open(filePath_black, 'w') as f:
-                            for id_ in obj_entries.black_sheeps_ids:
-                                f.write(id_ + "\n")
+                    obj_entries.clean_black_sheep(file_decode, purge)
 
                     purge.sheeps_ids += obj_entries.num_sheeps
                     purge.white_sheeps_ids += obj_entries.num_white_sheeps
 
-                print("*" * 50)
-                print("*" * 50)
-                print("*" * 50)
-                print("Conteo GENERAL")
-                # Esto es para TESTING (BORRAR)
-                for entry_type, count in purge.count_entry_type_all.items():
-                    print(f'{entry_type}: {count}')
+                for key, entry in purge.entradas_unicas.items():
+                    formatedEntry = purge.format_bibtext_entry(entry)
 
-                print("*" * 50)
-                print("Obejas: ", purge.sheeps_ids)
-                print("Obejas blancas: ", purge.white_sheeps_ids)
-                print("Obejas negras: ", len(purge.black_sheeps_ids))
-                print("*" * 50)
-                print("Entradas únicas: ")
-
-                for entry, value in purge.entradas_unicas.items():
+                    # escribir todas las entradas formateadas de una vez al final
                     with open(file_Path, 'a', encoding="utf8") as f:
-                        f.write(f'{entry}: {value}\n')
+                        f.write(formatedEntry)
 
                 size_File_bytes = os.path.getsize(file_Path)  # Tamaño de archivo
-                size_File = size_File_bytes / (1024 * 1024)  # Tamaño de archivo en MB
 
                 end_time = time.time()  # Tiempo de finalización de procesamiento
                 elapsed_time = end_time - start_time  # Calcular tiempo transcurrido en segundos
-
-                minu = int(elapsed_time // 60)
-                sec = int(elapsed_time % 60)
-
-                formatted_time = f"{minu:02}:{sec:02} seg"  # Tiempo formateado
-
-                data = {
-                    'count_typeEnt': purge.count_entry_type_all,
-                    'count_entries': purge.sheeps_ids,
-                    'count_process': purge.contArt - 1,
-                    'count_duplicated': len(purge.black_sheeps_ids),
-                    'count_files': len(files_bib),
-                    'name_file': name_File,
-                    # 'size_file': f'000000 MB',
-                    # 'url_file': f'0000000',
-                    'size_file': f'{size_File:.2f} MB',
-                    'url_file': f'{settings.MEDIA_URL}/files/bib/{name_File}',
-                    'elapsed_time': formatted_time,
-                }
 
                 # Crear el reporte asociado a este proyecto
                 newReport = Report.objects.create(
@@ -581,7 +512,7 @@ class ProcesamientoView(LoginRequiredMixin, View):
                     others=purge.count_entry_type_all.get('others', 0),
                     rep_n_articles_files=purge.sheeps_ids,
                     rep_n_processed=purge.contArt - 1,
-                    rep_n_duplicate=len(purge.black_sheeps_ids),
+                    rep_n_duplicate=purge.duplicate_sheeps,
                     rep_duration_seg=elapsed_time,
                     rep_n_files=len(files_bib),
                     rep_size_file=size_File_bytes,
@@ -609,6 +540,10 @@ class ProcesamientoView(LoginRequiredMixin, View):
             }
             for name, value in traceback_details.items():
                 print(f"  {name}: {value}")
+
+            # Eliminamos lo creado
+            new_project.deleteFiles()
+            new_project.delete()
 
             return JsonResponse({'error': 'Ocurrió un error en el servidor!',
                                  'error_message': str(e)}, status=500)
@@ -639,101 +574,39 @@ class ProcesamientoView2(LoginRequiredMixin, View):
             file_Path = os.path.join(settings.MEDIA_BIB, name_File)
 
             purge = PurgeData()
-            print("Antes de sumar", len(purge.black_sheeps_ids))
-            print("Antes de sumar", purge.black_sheeps_ids)
-
-            print("Cantidad de archivos", len(projectFiles))
 
             for projectFile in projectFiles:
                 projectFile_path = os.path.join(settings.MEDIA_BIB, projectFile.name_file)
                 # Abrir el archivo en modo lectura
                 with open(projectFile_path, 'r', encoding='utf-8') as file:
                     # Leer el contenido del archivo
-                    file_content = file.read()
+                    file_decode = file.read()
 
                 obj_entries = ProjectFile()
 
-                # file_decode = obj_entries.decode_file(file)
+                obj_entries.extract_data_file(file_decode)
 
-                obj_entries.extract_data_file(file_content)
-                print("Antes de sumar", len(purge.black_sheeps_ids))
                 purge.black_sheeps_ids += obj_entries.black_sheeps_ids
-                print("Depsues de sumar", len(purge.black_sheeps_ids))
 
-                for entry in obj_entries.read_bibtext(file_content):
-                    # Obtengo el tipo de entrada y lo acumulo en el diccionario (conteo de tipos de entrada)
-                    type_entry = obj_entries.get_type_entry(entry)
+                obj_entries.unificar_entradas(file_decode, purge)
 
-                    if type_entry not in purge.count_entry_type_all:
-                        purge.count_entry_type_all[type_entry] = 1
-                    else:
-                        purge.count_entry_type_all[type_entry] += 1
-
-                    formatedEntry = purge.format_bibtext_entry(entry)
-
-                    # escribir todas las entradas formateadas de una vez al final
-                    with open(file_Path, 'a', encoding="utf8") as f:
-                        f.write(formatedEntry)
-
-                print("*" * 50)
-                print("Obejas: ", obj_entries.num_sheeps)
-                print("Obejas blancas: ", obj_entries.num_white_sheeps)
-                print("Obejas negras: ", obj_entries.num_black_sheeps)
-
-                # if obj_entries.num_black_sheeps > 0:
-                #     filePath_black = os.path.join(settings.MEDIA_BIB, f'BSHEEP_{name_date}_{file.name}.txt')
-                #     with open(filePath_black, 'w') as f:
-                #         for id_ in obj_entries.black_sheeps_ids:
-                #             f.write(id_ + "\n")
+                obj_entries.clean_black_sheep(file_decode, purge)
 
                 purge.sheeps_ids += obj_entries.num_sheeps
                 purge.white_sheeps_ids += obj_entries.num_white_sheeps
 
-            print("*" * 50)
-            print("*" * 50)
-            print("*" * 50)
-            print("Conteo GENERAL")
-            # Esto es para TESTING (BORRAR)
-            for entry_type, count in purge.count_entry_type_all.items():
-                print(f'{entry_type}: {count}')
+            for key, entry in purge.entradas_unicas.items():
+                formatedEntry = purge.format_bibtext_entry(entry)
 
-            print("*" * 50)
-            print("Obejas: ", purge.sheeps_ids)
-            print("Obejas blancas: ", purge.white_sheeps_ids)
-            print("Obejas negras: ", len(purge.black_sheeps_ids))
-            print("*" * 50)
-            print("Entradas únicas: ")
-
-            for entry, value in purge.entradas_unicas.items():
+                # escribir todas las entradas formateadas de una vez al final
                 with open(file_Path, 'a', encoding="utf8") as f:
-                    f.write(f'{entry}: {value}\n')
+                    f.write(formatedEntry)
 
             size_File_bytes = os.path.getsize(file_Path)  # Tamaño de archivo
-            size_File = size_File_bytes / (1024 * 1024)  # Tamaño de archivo en MB
 
             end_time = time.time()  # Tiempo de finalización de procesamiento
             elapsed_time = end_time - start_time  # Calcular tiempo transcurrido en segundos
 
-            # minu = int(elapsed_time // 60)
-            # sec = int(elapsed_time % 60)
-
-            # formatted_time = f"{minu:02}:{sec:02} seg"  # Tiempo formateado
-
-            # data = {
-            #     'count_typeEnt': purge.count_entry_type_all,
-            #     'count_entries': purge.sheeps_ids,
-            #     'count_process': purge.contArt - 1,
-            #     'count_duplicated': len(purge.black_sheeps_ids),
-            #     'count_files': len(projectFiles),
-            #     'name_file': name_File,
-            #     # 'size_file': f'000000 MB',
-            #     # 'url_file': f'0000000',
-            #     'size_file': f'{size_File:.2f} MB',
-            #     'url_file': f'{settings.MEDIA_URL}/files/bib/{name_File}',
-            #     'elapsed_time': formatted_time,
-            # }
-
-            print('Cantidad de n dup: ', len(purge.black_sheeps_ids))
             # Crear el reporte asociado a este proyecto
             newReport = Report.objects.create(
                 id_project=project,
@@ -745,7 +618,7 @@ class ProcesamientoView2(LoginRequiredMixin, View):
                 others=purge.count_entry_type_all.get('others', 0),
                 rep_n_articles_files=purge.sheeps_ids,
                 rep_n_processed=purge.contArt - 1,
-                rep_n_duplicate=len(purge.black_sheeps_ids),
+                rep_n_duplicate=purge.duplicate_sheeps,
                 rep_duration_seg=elapsed_time,
                 rep_n_files=len(projectFiles),
                 rep_size_file=size_File_bytes,

@@ -14,7 +14,7 @@
     <div class="card">
         <div class="card-header">
             <div class="row">
-                <div class="col col-10 d-flex justify-content-center align-items-center">
+                <div class="col col-10 d-flex align-items-center">
                     <a type="button" class="btn btn-back me-2" href="{{ previous_page_url }}"><i class="bi bi-arrow-left"></i></a>
                     <h2 class="mb-0">REPORTE DE PROYECTO</h2>
                 </div>
@@ -128,7 +128,7 @@
                                         </div>
 
                                         <div class="col-12 col-xl-4 my-2 my-xl-auto d-flex justify-content-center align-items-center">
-                                            <a class="btn btn_warning col-9 col-xl" href="{{ object.get_file_url }}" download>
+                                            <a id="btn-download" class="btn btn_warning col-9 col-xl" href="{{ object.get_file_url }}" download>
                                                 <i class="bi bi-download me-2"></i>
                                                 <p>Descargar</p>
                                             </a>

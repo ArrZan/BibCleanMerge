@@ -1,10 +1,10 @@
 
 class PurgeData:
     def __init__(self):
-        self.contArt = 1  # Contador de los entry's
         self.entradas_unicas = {}
 
         self.sheeps_ids = 0  # contador de los entry por regex
+        self.duplicate_sheeps = 0
         self.white_sheeps_ids = 0  # contador de los entry por regex
         self.black_sheeps_ids = []  # lista de todas las obejas negras
         self.contArt = 1  # Contador de los entry's

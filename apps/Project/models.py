@@ -1,5 +1,8 @@
 import re
 import os
+import unicodedata
+
+
 from datetime import datetime
 from unidecode import unidecode
 
@@ -183,7 +186,6 @@ class ProjectFile:
         self.num_white_sheeps = 0
         self.num_black_sheeps = 0
         self.exist_b_sheep = False
-
         self.type_counts = {
             'article': 0,
             'book': 0,
@@ -209,20 +211,8 @@ class ProjectFile:
 
     @staticmethod
     def read_bibtext(file_decode):
-        import time
-        start_time = time.time()  # Tiempo de inicio de procesamiento
         bib_database = bparser.loads(file_decode)
 
-        end_time = time.time()  # Tiempo de finalización de procesamiento
-        elapsed_time = end_time - start_time  # Calcular tiempo transcurrido en segundos
-
-        minu = int(elapsed_time // 60)
-        sec = int(elapsed_time % 60)
-
-        formatted_time = f"{minu:02}:{sec:02} seg"  # Tiempo formateado
-
-        count = 0
-        # Generador
         for entry in bib_database.entries:
             yield entry
 
@@ -248,9 +238,6 @@ class ProjectFile:
             if index < effective_limit - 1:
                 end_index = self.sheeps_ids[index + 1].start()
             else:
-                print(limit, 'limite')
-                print(index, 'index')
-                print(len(self.sheeps_ids), 'ids')
                 if len(self.sheeps_ids) > limit and index == effective_limit - 1:
                     end_index = self.sheeps_ids[index + 1].start()
                 else:
@@ -272,50 +259,73 @@ class ProjectFile:
         return entries
 
     def extract_data_file(self, file_decode):
+        """
+            Extraemos las obejas y las obejas blancas, así mismo como el número de estas y por ende,
+            el número de obejas negras junto con su exist.
+        """
         self.get_sheeps(file_decode)
         self.get_white_sheeps(file_decode)
 
         self.num_sheeps = len(self.sheeps_ids)
         self.num_white_sheeps = len(self.white_sheeps_ids)
         self.num_black_sheeps = self.num_sheeps - self.num_white_sheeps
-        print(self.num_black_sheeps, " numero de obejas")
 
         self.exist_b_sheep = True if self.num_black_sheeps > 0 else False
 
         self.obtain_black_sheeps()
 
     def get_type_entry(self, entry):
+        """
+            Obtenemos el tipo de entrada para acumularlo por todas las entradas y obtener
+            la cantidad total que existe en un archivo
+        """
         entry_type = entry.get('ENTRYTYPE', '').lower()
 
         self.type_counts[entry_type] += 1
 
+        # Preguntamos nomás por los 3 más populares, los otros van por others
         if entry_type == 'article' or entry_type == 'book' or entry_type == 'conference':
             return entry_type
         else:
             return 'others'
 
     def get_white_sheeps(self, file_decode):
+        """
+            Obtenemos únicamente el ID de las obejas blancas
+        """
         for entry in self.read_bibtext(file_decode):
             entry_id = entry.get('ID', '')
             self.white_sheeps_ids.append(entry_id)
 
     def obtain_black_sheeps(self):
+        """
+            Obtenemos por medio de conjuntos la diferencia entre las obejas blancas y las obejas,
+            para conseguir los ID de las obejas negras
+        """
         if self.exist_b_sheep:
+            # Como tenemos un match, consultamos por group en el for para obtener el ID de las obejas
             set_S = set([sheep.group(1) for sheep in self.sheeps_ids])
 
             set_WS = set(self.white_sheeps_ids)
 
+            # Obtenemos la diferencia entre los conjuntos y así conseguimos las obejas negras
             self.black_sheeps_ids = list(set_S.difference(set_WS))
 
     def get_sheeps(self, decode_file):
+        # Obtenemos una lista de match (sus coordenadas y el valor capturado por el pattern) por cada entrada
         self.sheeps_ids = list(re.finditer(r'@\w+\{\s*(\S.+),', decode_file))
 
     def unificar_entradas(self, file_decode, Obj_PurgeData):
-
+        """
+            Unificamos e integramos los datos de entradas repetidas, es decir,
+            si hay artículos repetidos, se integrará la información que no exista
+            en el artículo del Obj_PurgeData y obtener uno solo.
+        """
         for entry in self.read_bibtext(file_decode):
             # Obtengo el tipo de entrada y lo acumulo en el diccionario (conteo de tipos de entrada)
             type_entry = self.get_type_entry(entry)
 
+            # Acumulamos los tipos de entradas
             if type_entry not in Obj_PurgeData.count_entry_type_all:
                 Obj_PurgeData.count_entry_type_all[type_entry] = 1
             else:
@@ -323,25 +333,31 @@ class ProjectFile:
 
             # Se controla lo que son el título y autor, se los convierte a minúscula
             # para evitar problemas en la comparación
+            # print('*'*50)
+            # print('*'*50)
+            # for key, value in entry.items():
+            #     print(key, "    ", unidecode(value))
+
             title = entry['title'].lower()
             title = self.replace_slash(title)
-            author = entry['author'].lower()
-            print(unidecode(author))
-            author = self.replace_slash(author)
+            if 'author' in entry:
+                author = entry['author'].lower()
+                author = self.replace_slash(author)
 
-            # Lo guardamos en una tupla para meterlo como clave en el diccionario
-            clave = (title, author, entry['year'])
+                # Lo guardamos en una tupla para meterlo como clave en el diccionario
+                clave = (title, author, entry['year'])
+            else:
+                # Lo guardamos en una tupla para meterlo como clave en el diccionario
+                clave = (title, entry['year'])
 
             # Si no está la clave, esta ingresa como única junto con el entry
             if clave not in Obj_PurgeData.entradas_unicas:
-                # Obj_PurgeData.entradas_unicas[clave] = entry
-                Obj_PurgeData.entradas_unicas[clave] = 1
+                Obj_PurgeData.entradas_unicas[clave] = entry
             else:
-                # Si es una clave repetida, se los manda a combinar
-                # Obj_PurgeData.entradas_unicas[clave] = self.combinar_entradas(Obj_PurgeData.entradas_unicas[clave], entry)
-                Obj_PurgeData.entradas_unicas[clave] += 1
-
-            Obj_PurgeData.contArt += 1
+                # Si es una clave repetida, se los manda a integrar o combinar
+                Obj_PurgeData.entradas_unicas[clave] = (
+                    self.combinar_entradas(Obj_PurgeData.entradas_unicas[clave], entry))
+                Obj_PurgeData.duplicate_sheeps += 1
 
     def combinar_entradas(self, e1, e2):
         # Combina las dos entradas añadiendo los campos faltantes de e1 con los de e2
@@ -361,6 +377,7 @@ class ProjectFile:
         # elimina espacios adicionales y las ordena alfabéticamente
         if isinstance(keywords, str):
             keywords = keywords.split(',')
+
         keywords_normalizadas = set()
         for kw in keywords:
             kw_normalizada = re.sub(r'\s+', ' ', kw.strip().lower())
@@ -379,112 +396,45 @@ class ProjectFile:
 
     @staticmethod
     def replace_slash(string):
+        #  Reemplaza el salto de línea o \n
         return string.replace('\n', ' ')
 
-    def get_id_regex(self, content):
-        return re.findall(r'@\w+\{\s*(\S.+),', content)
+    def clean_black_sheep(self, file_decode, Obj_PurgeData):
+        # Control de las obejas negras o entradas con inconsistencias
+        if self.exist_b_sheep:
 
-    def clean_black_sheep(self, entries, content):
-        # Sacamos una lista completa de todos las entradas con regex
-        list_entry_id = self.get_id_regex(content)
+            for cont, match in enumerate(self.sheeps_ids):
+                id_entry = match.group(1)
 
-        # Hacemos una copia de lista extraída
-        list_not_ID = list_entry_id.copy()
+                # Si el id existe en las obejas negras...
+                if id_entry in self.black_sheeps_ids:
+                    # Obtenemos su posición de inicio y fin (que normalmente es el inicio del siguiente match)
+                    index_start = match.start()
 
-        for entry in entries:
-            entry_id = entry.get('ID', '')
+                    # Si la entrada es la última, obtenemos None (dado que no hay un match posterior)
+                    if cont+1 == len(self.sheeps_ids):
+                        index_end = None
+                    else:
+                        # Si no obtenemos la coordenada del siguiente match
+                        index_end = self.sheeps_ids[cont + 1].start()
 
-            # Removemos de la copia los valores existentes del entrie y dejamos los que tienen inconsistencias
-            if entry_id in list_entry_id:
-                list_not_ID.remove(entry_id)
+                    inconsistent_entry = file_decode[index_start:index_end]
 
-        # Esto es para TESTING (BORRAR)
-        name_date = datetime.now().strftime("%Y%m%d%H%M%S")
-        from main import settings
-        filePath = os.path.join(settings.MEDIA_BIB, f'list_ovejas_negras_{name_date}.txt')
+                    # Por lo general, las inconsistencias suelen ser espacios en las claves del diccionario
+                    if " " in id_entry:
+                        new_id_entry = id_entry.replace(" ", "")
+                        inconsistent_entry = inconsistent_entry.replace(id_entry, new_id_entry)
 
-        # Esto es para TESTING (BORRAR)
-        print("Cantidad de id's: ", len(list_entry_id))
-        print("Contador de objeas negras: ", len(list_not_ID))
-        print("Lista de obejas negras: \n", list_not_ID)
-        with open(filePath, 'w') as f:
-            for id_ in list_not_ID:
-                f.write(id_ + "\n")
+                    # Obtenemos los campos de la entrada (author, year, title, etc)
+                    inconsistent_fields = re.findall(r'(\S.+)[\s=]\{', inconsistent_entry)
 
-        return f"""Cantidad de id's: {len(list_entry_id)}\nConteo de los tipos: {len(entries)}\nContador de objeas negras: {len(list_not_ID)}\nLista de obejas negras: {list_not_ID}
-        """
+                    for field in inconsistent_fields:
+                        # Normalizamos porque suele venir espacios en diferentes formatos
+                        field_decoded = unicodedata.normalize("NFKD", field)
+                        # Quitamos el " =" porque el regex no lo pude mejorar para que no leyera esa parte
+                        field_decoded = field_decoded.replace(' =', '')
+                        # Quitamos el espacio
+                        if " " in field_decoded:
+                            inconsistent_entry = inconsistent_entry.replace(field, field_decoded.replace(" ", ""))
 
-    # def get_numbers_standard_types(self, entries):
-    #     # Creamos un diccionario con los standar type y un contador en 0
-    #     type_counts = {'article': 0,
-    #                    'book': 0,
-    #                    'conference': 0,
-    #                    'others': 0,
-    #                    }
-    #
-    #     # Iteramos los entries del parser
-    #     for entry in entries:
-    #         entry_type = entry.get('ENTRYTYPE', '').lower()
-    #
-    #         # Sacamos la cantidad por cada tipo de entry (books, article, conferences, etc)
-    #         if entry_type in type_counts:
-    #             type_counts[entry_type] += 1
-    #         else:
-    #             type_counts['others'] += 1
-    #
-    #     # Esto es para TESTING (BORRAR)
-    #     for entry_type, count in type_counts.items():
-    #         print(f'{entry_type}: {count}')
-    #
-    #     return type_counts
-    #
-
-
-
-
-# class ProjectFiles(models.Model):
-#     id_project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='files')
-#     pf_name_file = models.CharField(max_length=100)
-#     pf_p_articles = models.IntegerField()
-#     pf_p_conferences = models.IntegerField()
-#     pf_p_papers = models.IntegerField()
-#     pf_p_books = models.IntegerField()
-#     pf_p_others = models.IntegerField()
-#     pf_n_entries_file = models.IntegerField()
-
-# class Base(models.Model):
-#     name_file = models.CharField(max_length=100)
-#     articles = models.IntegerField()
-#     conferences = models.IntegerField()
-#     papers = models.IntegerField()
-#     books = models.IntegerField()
-#     others = models.IntegerField()
-# class ProjectFiles(models.Model):
-#     id_project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='files')
-#     pf_n_entries_file = models.IntegerField()
-# class Report(Base):
-#     id_project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='reports')
-#     rep_n_articles_files = models.IntegerField()
-#     rep_n_processed = models.IntegerField()
-#     rep_n_duplicate = models.IntegerField()
-#     rep_n_files = models.IntegerField()
-#     rep_duration_seg = models.IntegerField()
-#     rep_size_file = models.IntegerField()
-#     rep_date = models.DateField(auto_now_add=True)  # Permite agregar la fecha actual al registrar
-
-
-# class Report(models.Model):
-#     id_project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='reports')
-#     rep_name_file_merged = models.CharField(max_length=100)
-#     rep_p_articles = models.IntegerField()
-#     rep_p_conferences = models.IntegerField()
-#     rep_p_papers = models.IntegerField()
-#     rep_p_books = models.IntegerField()
-#     rep_p_others = models.IntegerField()
-#     rep_n_articles_files = models.IntegerField()
-#     rep_n_processed = models.IntegerField()
-#     rep_n_duplicate = models.IntegerField()
-#     rep_n_files = models.IntegerField()
-#     rep_duration_seg = models.IntegerField()
-#     rep_size_file = models.IntegerField()
-#     rep_date = models.DateField(auto_now_add=True)  # Permite agregar la fecha actual al registrar
+                    self.unificar_entradas(inconsistent_entry, Obj_PurgeData)

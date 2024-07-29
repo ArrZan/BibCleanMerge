@@ -38,7 +38,7 @@ $d.addEventListener('click', function(event) {
         const anchor = event.target.closest('a');
 
         // Verifica si el clic ocurrió dentro de un enlace (<a>) o en el propio enlace
-        if (anchor && anchor.tagName === 'A') {
+        if (anchor && anchor.tagName === 'A' && anchor.id !== 'btn-download') {
             event.preventDefault();  // Evita la acción por defecto del enlace
             // Aquí puedes mostrar un mensaje al usuario o realizar alguna acción
             $d.querySelector('.card-header .btn-close').click();

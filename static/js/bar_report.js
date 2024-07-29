@@ -1,9 +1,18 @@
+// Define el mapeo de traducción
+const translations = {
+    'article': 'Artículo',
+    'book': 'Libro',
+    'conference': 'Conferencia',
+    'others': 'Otros'
+};
 
-// Aquí va la data que traemos del backend, hacemos un mapping para mandarlo como D3 requiere
+// Mapeamos los datos con las traducciones
 const data = Object.keys(var_dataReport).map(function(key) {
-    return { label: key, value: var_dataReport[key]};
+    return {
+        label: translations[key] || key, // Usar la traducción si existe, de lo contrario usar la clave original
+        value: var_dataReport[key]
+    };
 });
-
 
 // Especificamos las dimensiones del chart y que sea responsive.
 const svg = d3.select("svg"),
@@ -72,7 +81,8 @@ function drawChart() {
         })
         .attr("width", 40) // Ajusta el ancho según sea necesario
         .attr("height", 20) // Ajusta la altura según sea necesario
-        .html(d => `<div class="text-background">${((d.data.value / d3.sum(data, d => d.value)) * 100).toFixed(1)}%</div>`);
+        .html(d => `<div class="text-background">${d.data.value}</div>`); // Valor numérico
+        // .html(d => `<div class="text-background">${((d.data.value / d3.sum(data, d => d.value)) * 100).toFixed(1)}</div>`); // Porcentaje del valaor numérico
 
     arc.select("path")
         .attr("d", path);
